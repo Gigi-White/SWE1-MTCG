@@ -28,4 +28,11 @@ namespace Monster_Trading_Card_Game
         FireElve,
         none,
     }
+
+    public enum winner
+    {
+        FirstPlayer,
+        SekondPlayer,
+        Draw,
+    }
 }

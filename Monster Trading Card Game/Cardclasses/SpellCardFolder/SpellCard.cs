@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Monster_Trading_Card_Game
 {
-    abstract class SpellCard : Card
+    class SpellCard : Card
     {
 
         override public element Element { get; }
@@ -36,6 +36,7 @@ namespace Monster_Trading_Card_Game
 
         public override void SetDamage(Card card, int damage)
         {
+            
             int realdamage = damage;
 
             if (this.Element == element.fire && card.Element == element.water || this.Element == element.water && card.Element == element.normal || this.Element == element.normal && card.Element == element.fire)

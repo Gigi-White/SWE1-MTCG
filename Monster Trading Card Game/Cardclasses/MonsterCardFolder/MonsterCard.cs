@@ -29,6 +29,7 @@ namespace Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder
         //Standardfunktion  erlittener Schaden. Bei Kampf gegen einen Spell wird das Element miteinberechnet
         public override void SetDamage(Card card, int damage)
         {
+            
             int realDamage = damage;
 
             if (card.Type == cardType.spell)

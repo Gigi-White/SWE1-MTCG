@@ -15,7 +15,7 @@ namespace Monster_Trading_Card_Game
 
         override public int Attack(Card card)
         {
-            int realdamage = this.Damage;
+            int realdamage = AttackPower;
             if (card.Creature == creatureType.Dragon)
             {
                 realdamage = 0;

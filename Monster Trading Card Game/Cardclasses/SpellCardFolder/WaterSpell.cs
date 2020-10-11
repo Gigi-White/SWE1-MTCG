@@ -8,7 +8,7 @@ namespace Monster_Trading_Card_Game
     {
         public WaterSpell() : base(element.water,30)
         {
-
+   
         }
     }
 }
