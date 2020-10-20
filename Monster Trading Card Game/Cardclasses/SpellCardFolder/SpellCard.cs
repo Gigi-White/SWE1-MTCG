@@ -1,24 +1,25 @@
-﻿using System;
+﻿using Monster_Trading_Card_Game.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Monster_Trading_Card_Game
 {
-    class SpellCard : Card
+    public class SpellCard : Card
     {
 
-        override public element Element { get; }
-        override public cardType Type { get; }
-        override public creatureType Creature { get; }
+        override public Element Element { get; }
+        override public CardType Type { get; }
+        override public CreatureType Creature { get; }
 
         override public int AttackPower { get; }
         override public int Damage { get; set; }
 
-        public SpellCard(element element, int attackPower)
+        public SpellCard(Element element, int attackPower)
         {
             Element = element;
-            Type = cardType.spell;
-            Creature = creatureType.none;
+            Type = CardType.Spell;
+            Creature = CreatureType.None;
             AttackPower = attackPower;
             Damage = 0;
 
@@ -39,11 +40,11 @@ namespace Monster_Trading_Card_Game
             
             int realdamage = damage;
 
-            if (this.Element == element.fire && card.Element == element.water || this.Element == element.water && card.Element == element.normal || this.Element == element.normal && card.Element == element.fire)
+            if (this.Element == Element.Fire && card.Element == Element.Water || this.Element == Element.Water && card.Element == Element.Normal || this.Element == Element.Normal && card.Element == Element.Fire)
             {
                 realdamage = realdamage * 2;
             }
-            else if (this.Element == element.fire && card.Element == element.normal || this.Element == element.water && card.Element == element.fire || this.Element == element.normal && card.Element == element.water)
+            else if (this.Element == Element.Fire && card.Element == Element.Normal || this.Element == Element.Water && card.Element == Element.Fire || this.Element == Element.Normal && card.Element == Element.Water)
             {
                 realdamage = realdamage / 2;
             }

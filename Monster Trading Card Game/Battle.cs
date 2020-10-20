@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Monster_Trading_Card_Game.Enums;
+using System;
 using System.Collections.Generic;
 using System.Reflection.Metadata;
 using System.Text;
 
 namespace Monster_Trading_Card_Game
 {
-    class Battle
+    public class Battle
     {
         private string UserOne;
         private string UserTwo;
@@ -13,7 +14,7 @@ namespace Monster_Trading_Card_Game
         private List<Card> DeckTwo;
         private int Rounds = 1;
         private List<string> Log = new List<string>();
-        private winner betterfighter;
+        private Winner betterfighter;
 
 
     public Battle(List<Card> playerOne, List<Card> playerTwo, string firstUser, string secondUser)
@@ -27,7 +28,7 @@ namespace Monster_Trading_Card_Game
         }
         
         //----------------------Hauptfunktion welche das Spiel berechnet------------------------------
-        public winner BattleHandler() 
+        public Winner BattleHandler() 
         {
             
 
@@ -42,11 +43,11 @@ namespace Monster_Trading_Card_Game
 
             //Nochmal ein Log Eintrag wer gewonnen hat
             Log.Add("Spiel ist beendet");
-            if (betterfighter == winner.FirstPlayer)
+            if (betterfighter == Winner.FirstPlayer)
             {
                 Log.Add("#####  " + UserOne + " hat gewonnen  #####");
             }
-            else if(betterfighter == winner.SekondPlayer)
+            else if(betterfighter == Winner.SekondPlayer)
             {
                 Log.Add("#####  " + UserTwo + " hat gewonnen  #####");
             }
@@ -92,15 +93,15 @@ namespace Monster_Trading_Card_Game
         {
             if (DeckOne.Count > DeckTwo.Count)
             {
-                betterfighter = winner.FirstPlayer;
+                betterfighter = Winner.FirstPlayer;
             }
             else if(DeckTwo.Count > DeckOne.Count)
             {
-                betterfighter = winner.SekondPlayer;
+                betterfighter = Winner.SekondPlayer;
             }
             else
             {
-                betterfighter = winner.Draw;
+                betterfighter = Winner.Draw;
             }
 
         }
@@ -109,7 +110,7 @@ namespace Monster_Trading_Card_Game
         //-------------------------------------------Funktion die eine Kampfrunde berechnet---------------------------
         private void Round()
         {
-            //wer hat zuerst angegriffen
+            //wer greift zuerst an
             Random rnd = new Random();
             int turn = rnd.Next(1, 3);
             //welche Karte wird von dem jeweiligen Deck hergenommen?

@@ -4,9 +4,9 @@ using System.Text;
 
 namespace Monster_Trading_Card_Game
 {
-    class NormalSpell : SpellCard
+    public class NormalSpell : SpellCard
     {
-        public NormalSpell() : base(element.normal, 30)
+        public NormalSpell() : base(Element.Normal, 30)
         {
 
         }
