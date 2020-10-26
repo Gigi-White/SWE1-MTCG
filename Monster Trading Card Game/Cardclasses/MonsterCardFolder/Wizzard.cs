@@ -1,13 +1,14 @@
-﻿using System;
+﻿using Monster_Trading_Card_Game.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder
 {
-    class Wizzard : MonsterCard
+     public class Wizzard : MonsterCard
     {
 
-        public Wizzard() :base(element.water,40,creatureType.Wizzard)
+        public Wizzard() :base(Element.Water,40,CreatureType.Wizzard)
         {
  
         }
@@ -16,18 +17,18 @@ namespace Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder
         public override void SetDamage(Card card, int damage)
         {
             int realDamage = damage;
-            if (card.Type == cardType.spell)
+            if (card.Type == CardType.Spell)
             {
-                if (this.Element == element.fire && card.Element == element.water || this.Element == element.water && card.Element == element.normal || this.Element == element.normal && card.Element == element.fire)
+                if (this.Element == Element.Fire && card.Element == Element.Water || this.Element == Element.Water && card.Element == Element.Normal || this.Element == Element.Normal && card.Element == Element.Fire)
                 {
                     realDamage = realDamage * 2;
                 }
-                else if (this.Element == element.fire && card.Element == element.normal || this.Element == element.water && card.Element == element.fire || this.Element == element.normal && card.Element == element.water)
+                else if (this.Element == Element.Fire && card.Element == Element.Normal || this.Element == Element.Water && card.Element == Element.Fire || this.Element == Element.Normal && card.Element == Element.Water)
                 {
                     realDamage = realDamage / 2;
                 }
             }
-            else if(card.Type == cardType.monster && card.Creature == creatureType.Ork)
+            else if(card.Type == CardType.Monster && card.Creature == CreatureType.Ork)
             {
                 realDamage = 0;
             }

@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Monster_Trading_Card_Game.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder
 {
-    class FireElfe : MonsterCard
+    public class FireElfe : MonsterCard
     {
-        public FireElfe(): base(element.fire, 40, creatureType.FireElve)
+        public FireElfe(): base(Element.Fire, 40, CreatureType.FireElve)
         {
 
         }
@@ -15,18 +16,18 @@ namespace Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder
         {
             int realDamage = damage;
 
-            if (card.Type == cardType.spell)
+            if (card.Type == CardType.Spell)
             {
-                if (this.Element == element.fire && card.Element == element.water || this.Element == element.water && card.Element == element.normal || this.Element == element.normal && card.Element == element.fire)
+                if (this.Element == Element.Fire && card.Element == Element.Water || this.Element == Element.Water && card.Element == Element.Normal || this.Element == Element.Normal && card.Element == Element.Fire)
                 {
                     realDamage = realDamage * 2;
                 }
-                else if (this.Element == element.fire && card.Element == element.normal || this.Element == element.water && card.Element == element.fire || this.Element == element.normal && card.Element == element.water)
+                else if (this.Element == Element.Fire && card.Element == Element.Normal || this.Element == Element.Water && card.Element == Element.Fire || this.Element == Element.Normal && card.Element == Element.Water)
                 {
                     realDamage = realDamage / 2;
                 }
             }
-            else if (card.Type == cardType.monster && card.Creature == creatureType.Dragon)
+            else if (card.Type == CardType.Monster && card.Creature == CreatureType.Dragon)
             {
                 realDamage = 0;
             }

@@ -1,13 +1,14 @@
-﻿using System;
+﻿using Monster_Trading_Card_Game.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder
 {
-    class Knight : MonsterCard
+    public class Knight : MonsterCard
     {
   
-        public Knight():base(element.normal, 40, creatureType.Knight)
+        public Knight():base(Element.Normal, 40, CreatureType.Knight)
         {
             
         }
@@ -15,7 +16,7 @@ namespace Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder
         override public int Attack(Card card)
         {
             int realDamage = AttackPower;
-            if(card.Type == cardType.spell && card.Element == element.water)
+            if(card.Type == CardType.Spell && card.Element == Element.Water)
             {
                 realDamage = 0;
             }

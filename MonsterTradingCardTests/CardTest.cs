@@ -1,10 +1,12 @@
 
 using Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder;
 using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace Monster_Trading_Card_Game
 {
-    public class Tests
+    [TestFixture]
+    public class CardTest
     {
 
         //------------------Check ob alle speziellen Kartenfähigkeiten funktionieren----------------------
@@ -86,10 +88,14 @@ namespace Monster_Trading_Card_Game
 
             var SpellDamage = Mordechai.Damage;
             var Orkdamage = Aquaknarre.Damage;
+    
 
             Assert.AreEqual(100, Orkdamage);
             Assert.AreEqual(15, SpellDamage);
         }
-        
+
+
+       
+
     }
 }

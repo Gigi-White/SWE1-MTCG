@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Monster_Trading_Card_Game.Enums;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq.Expressions;
@@ -8,9 +9,9 @@ namespace Monster_Trading_Card_Game
 {
     public abstract class Card
     {
-        public abstract element Element { get; }
-        public abstract cardType Type { get;}
-        public abstract creatureType Creature { get; }
+        public abstract Element Element { get; }
+        public abstract CardType Type { get;}
+        public abstract CreatureType Creature { get; }
 
         public abstract int AttackPower { get; }
 

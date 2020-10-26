@@ -4,9 +4,9 @@ using System.Text;
 
 namespace Monster_Trading_Card_Game
 {
-    class FireSpell : SpellCard
+     public class FireSpell : SpellCard
     {
-        public FireSpell() : base(element.fire, 30)
+        public FireSpell() : base(Element.Fire, 30)
         {
             
         }

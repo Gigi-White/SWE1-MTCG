@@ -4,11 +4,16 @@ using System.Text;
 
 namespace Monster_Trading_Card_Game
 {
-    public class WaterSpell : SpellCard
+    public enum Element
     {
-        public WaterSpell() : base(Element.Water,30)
-        {
-   
-        }
+        Water,
+        Fire,
+        Normal
     }
+
+    
+
+ 
+
+ 
 }

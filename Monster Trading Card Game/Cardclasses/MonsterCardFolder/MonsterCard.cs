@@ -1,20 +1,23 @@
-﻿using System;
+﻿using Monster_Trading_Card_Game.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder
 {
-    class MonsterCard : Card
+    public class MonsterCard : Card
     {
-        override public element Element { get; }
-        override public cardType Type { get; }
-        override public creatureType Creature { get; }
+        override public Element Element { get; }
+        override public CardType Type { get; }
+        override public CreatureType Creature { get; }
         override public int AttackPower { get; }
         override public int Damage { get; set; }
 
-        public MonsterCard(element element, int attackPower, creatureType creatureType)
+
+
+        public MonsterCard(Element element, int attackPower, CreatureType creatureType)
         {
-            Type = cardType.monster;
+            Type = CardType.Monster;
             Element = element;
             AttackPower = attackPower;
             Creature = creatureType;
@@ -29,15 +32,16 @@ namespace Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder
         //Standardfunktion  erlittener Schaden. Bei Kampf gegen einen Spell wird das Element miteinberechnet
         public override void SetDamage(Card card, int damage)
         {
+            
             int realDamage = damage;
 
-            if (card.Type == cardType.spell)
+            if (card.Type == CardType.Spell)
             {
-                if (this.Element == element.fire && card.Element == element.water || this.Element == element.water && card.Element == element.normal || this.Element == element.normal && card.Element == element.fire)
+                if (this.Element == Element.Fire && card.Element == Element.Water || this.Element == Element.Water && card.Element == Element.Normal || this.Element == Element.Normal && card.Element == Element.Fire)
                 {
                     realDamage = realDamage * 2;
                 }
-                else if (this.Element == element.fire && card.Element == element.normal || this.Element == element.water && card.Element == element.fire || this.Element == element.normal && card.Element == element.water)
+                else if (this.Element == Element.Fire && card.Element == Element.Normal || this.Element == Element.Water && card.Element == Element.Fire || this.Element == Element.Normal && card.Element == Element.Water)
                 {
                     realDamage = realDamage / 2;
                 }

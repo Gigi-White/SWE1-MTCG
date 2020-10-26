@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Monster_Trading_Card_Game.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder
 {
-    class Kraken :MonsterCard
+    public class Kraken :MonsterCard
     {
-        public Kraken() : base(element.water, 50, creatureType.Kraken)
+        public Kraken() : base(Element.Water, 50, CreatureType.Kraken)
         {
 
         }
@@ -15,7 +16,7 @@ namespace Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder
         public override void SetDamage(Card card, int damage)
         {
             int realDamage = damage;
-            if (card.Type == cardType.spell)
+            if (card.Type == CardType.Spell)
             {
                 realDamage = 0;
             }

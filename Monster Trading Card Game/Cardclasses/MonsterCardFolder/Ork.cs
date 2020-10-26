@@ -1,13 +1,14 @@
-﻿using System;
+﻿using Monster_Trading_Card_Game.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder
 {
-    class Ork : MonsterCard
+    public class Ork : MonsterCard
     {
      
-        public Ork():base(element.normal,50,creatureType.Ork)
+        public Ork():base(Element.Normal,50,CreatureType.Ork)
         {
         }
         //Ork hat von sich aus keine besonderen Eigenschaften
