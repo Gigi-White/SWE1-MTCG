@@ -74,7 +74,7 @@ namespace REST_HTTP_Server
             }
 
             Response resp = Response.From(req); //make the response message
-            resp.Post(client.GetStream()); //send the response message
+            resp.ServerResponse(client.GetStream()); //send the response message
 
         }
 
