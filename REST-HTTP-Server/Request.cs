@@ -15,16 +15,28 @@ namespace REST_HTTP_Server
         public String[] HeadRest{get; set;}
         
 
-        public Request(String type, String order, String version, String[] headRest)
+        public Request(String request)
         {
-            Type = type;
-            Order = order;
-            Version = version;
-            HeadRest = headRest;         
+            if (String.IsNullOrEmpty(request))
+            {
+                Type = "";
+                Order = "";
+                Version = "";
+                HeadRest[0] = "";
 
+            }
+            else
+            {
+                String[] tokens = request.Split("\n");
+                String[] mymessage = tokens[0].Split(" ");
+                Type = mymessage[0];
+                Order = mymessage[1];
+                Version = mymessage[2];
+                HeadRest = tokens;
+            }
         }
         //Get the sweet sweet Request infos----------------------------------
-        public static Request GetRequest(String request) 
+        /*public static Request GetRequest(String request) 
         {
             if( String.IsNullOrEmpty(request))
             {
@@ -43,7 +55,7 @@ namespace REST_HTTP_Server
             return new Request(type, order, url, headRest);
 
         }
-
+        */
       
 
       

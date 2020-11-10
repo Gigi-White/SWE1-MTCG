@@ -22,14 +22,16 @@ namespace REST_HTTP_Server
         {
             listener = new TcpListener(IPAddress.Any,port);
         }
-
+        //Prgramstart
         public void Start()
         {
+            //Zuerst wird die Directory erstellt
             string folderName = "messages";
             if (!Directory.Exists(folderName))
             {
                 Directory.CreateDirectory(folderName);
             }
+            //neuer Thread mit der Run Funktion wird erstellt
             Thread serverThread = new Thread(new ThreadStart(Run));
             serverThread.Start();
         }
@@ -43,9 +45,9 @@ namespace REST_HTTP_Server
             while (running) 
             {
                 Console.WriteLine("Waiting for connection...");
-                TcpClient client = listener.AcceptTcpClient();
+                TcpClient client = listener.AcceptTcpClient();  //Connection with client
                 Console.WriteLine("Client connected");
-                HandleClient(client);
+                HandleClient(client); //hanlde function
 
                 client.Close();
                 
@@ -58,7 +60,7 @@ namespace REST_HTTP_Server
         //handle the client----------------------------------------------
         private void HandleClient(TcpClient client) 
         {
-            StreamReader reader = new StreamReader(client.GetStream());
+            StreamReader reader = new StreamReader(client. GetStream()); //create reader
             String msg = "";
             while (reader.Peek() != -1) 
             {
@@ -66,14 +68,14 @@ namespace REST_HTTP_Server
             }
 
             Debug.WriteLine(msg);
-            Request req = Request.GetRequest(msg);  //get the request infos
+            Request req = new Request(msg);  //create Request Object that has all the Request infos
             
             foreach (var item in req.HeadRest)
             {      
                 Console.WriteLine(item.ToString());
             }
 
-            Response resp = Response.From(req); //make the response message
+            Response resp = new Response(req); //make the response message with the "From" function
             resp.ServerResponse(client.GetStream()); //send the response message
 
         }

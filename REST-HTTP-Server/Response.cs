@@ -15,17 +15,18 @@ namespace REST_HTTP_Server
         private String Data;
         private String Status;
         private String Mime;
-        private Response(String mime, String status, String data) 
+        public Response(Request request) 
         {
                
-            Mime = mime;
-            Status = status;
-            Data = data;
+            String[]mydata = From(request);
+            Mime = mydata[0];
+            Status = mydata[1];
+            Data = mydata[2];
 
         }
 
         //Build my Response values
-        public static Response From (Request request)
+        public string[] From (Request request)
         {
            if(request.Type == "POST")
             {
@@ -37,7 +38,7 @@ namespace REST_HTTP_Server
             }
             else if(request.Type =="DELETE")
             {
-                return DeleteHanlder(request);
+                return DeleteHandler(request);
             }
            else if(request.Type == "PUT")
             {
@@ -45,20 +46,20 @@ namespace REST_HTTP_Server
             }
 
 
-            Response myResponse = new Response("text/plain", "404 Not Found", "Wrong Input Man, just wrong");
+            string[] myResponse = { "text/plain", "404 Not Found", "" };
 
             return myResponse;
 
         }
         //############################# Functions to handle Post Request ###################################
         //If request is POST--------------------------------------
-        private static Response PostHandler(Request request) 
+        private string[] PostHandler(Request request) 
         {
-
-            if(request.Order != "/messages") 
+            
+            if (request.Order != "/messages") 
             {
-
-                return new Response("text/plain", "404 Not Found", "");
+                string[] badResponse = { "text/plain", "404 Not Found", "" };
+                return badResponse;
             }
             String body = "";
 
@@ -79,14 +80,13 @@ namespace REST_HTTP_Server
             string ID = CreateNewFile(body, request.Order);
 
 
-
-
-            return new Response("text/plain", "200 Request sucess", ID);
+            string[] goodResponse = { "text/plain", "200 Request sucess", ID };
+            return goodResponse;
         }
        
 
         //----------------------make the actual file and get the new id back---------------------------
-        private static string  CreateNewFile(string body, string path) 
+        private string  CreateNewFile(string body, string path) 
         {
             string ID = "";
             int data = 0;
@@ -139,7 +139,7 @@ namespace REST_HTTP_Server
         //########################### Functions to handle GET Request ########################################################
         
         //-------------------------------handle GET Request---------------------------------
-        private static Response GetHandler(Request request)
+        private string[] GetHandler(Request request)
         {
             
             if (request.Order == "/messages") //GET requet with all messages
@@ -152,7 +152,8 @@ namespace REST_HTTP_Server
             
             if (message<0) //if ValidOrder is invalid  the int message will be -1 
             {
-                return new Response("text/plain", "404 Not Found", "");
+                string[] badRequest = { "text/plain", "404 Not Found", "" };
+                return badRequest;
             }
             else 
             {
@@ -165,7 +166,7 @@ namespace REST_HTTP_Server
         }
 
         //------------get all messages----------------------
-        private static Response GetAll(String path) 
+        private string[] GetAll(String path) 
         {
             string theWay = (AppDomain.CurrentDomain.BaseDirectory + path);
             String body = "";
@@ -174,7 +175,8 @@ namespace REST_HTTP_Server
             if (files.Length == 0)
             {
                 body = "No files are available";
-                return new Response("text/plain", "200 Request sucess", body);
+                string[] firstResponse = { "text/plain", "200 Request sucess", body };
+                return firstResponse;
             }
             
             int number = 1;
@@ -185,14 +187,14 @@ namespace REST_HTTP_Server
             }
 
 
-
-            return new Response("text/plain", "200 Request sucess", body);
+            string[] secondResponse = { "text/plain", "200 Request sucess", body };
+            return secondResponse;
         }
 
 
        
         //----------------------------------------Gets on specific message---------------------------
-        private static Response GetOne(int number)
+        private string[] GetOne(int number)
         {
             String path = "/messages";
             
@@ -203,12 +205,14 @@ namespace REST_HTTP_Server
             if (files.Length < number)
             {
                 body = "File Number " + number.ToString()  + " is not available";
-                return new Response("text/plain", "200 Request sucess", body);
+                string[] firstResponse = { "text/plain", "200 Request sucess", body };
+                return firstResponse;
             }
             else
             {
                 body += number.ToString() + ". Message:\n" + File.ReadAllText(files[number-1].ToString()) + "\n";
-                return new Response("text/plain", "200 Request sucess", body);
+                string[] secondResponse = { "text/plain", "200 Request sucess", body };
+                return secondResponse;
             }
         }
         //#######################################################################################################################
@@ -217,13 +221,14 @@ namespace REST_HTTP_Server
         //##############################Functions to handle the DELETE Request###################################################
 
 
-        private static Response DeleteHanlder(Request request)
+        private string[] DeleteHandler(Request request)
         {
             int number = ValidOrder(request.Order);
 
             if (number<0)
             {
-                return new Response("text/plain", "404 Not Found", "");
+                string[] badResponse = { "text/plain", "404 Not Found", ""};
+                return badResponse;
             }
             else 
             {
@@ -232,7 +237,7 @@ namespace REST_HTTP_Server
             
         }
         //------------------------Delete the actual file-------------------------------------------- 
-        private static Response DeleteOne(int number) 
+        private string[] DeleteOne(int number) 
         {
             string body= "";
             string path = "/messages";
@@ -243,13 +248,15 @@ namespace REST_HTTP_Server
             if (files.Length < number)
             {
                 body = "File Number " + number.ToString() + " is not available";
-                return new Response("text/plain", "200 Request sucess", body);
+                string[] firstResponse = { "text/plain", "200 Request sucess", body};
+                return firstResponse;
             }
             else
             {
                 File.Delete(files[number - 1].ToString());  //file gets deleted
                 body = "File Number " + number.ToString() + " is deleted";
-                return new Response("text/plain", "200 Request sucess", body);
+                string[] secondResponse = { "text/plain", "200 Request sucess", body};
+                return secondResponse;
 
             }
             
@@ -263,13 +270,14 @@ namespace REST_HTTP_Server
         //###################################Functions that handle the PUT Request#######################################
 
         //Hanldes the PUT Request over all
-        private static Response PutHandler(Request request)
+        private string[] PutHandler(Request request)
         {
             int number = ValidOrder(request.Order); //check if PUT request with special message (/messages/1) is valid and get the number of the message as int
 
             if (number < 0) //if ValidOrder is invalid  the int message will be -1 
             {
-                return new Response("text/plain", "404 Not Found", "");
+                string[] badRequest = { "text/plain", "404 Not Found", "" };
+                return badRequest;
             }
 
             string body = "";
@@ -292,7 +300,7 @@ namespace REST_HTTP_Server
         }
 
 
-        private static Response PutOne(int number, string message) 
+        private string[] PutOne(int number, string message) 
         {
             string path = "/messages";
             string body = "";
@@ -302,13 +310,14 @@ namespace REST_HTTP_Server
             if (files.Length < number)
             {
                 body = "File Number " + number.ToString() + " is not available";
-                return new Response("text/plain", "200 Request sucess", body);
-            }
+                string[] firstResponse = { "text/plain", "200 Request sucess", body };
+                return firstResponse;            }
             else
             {
                 File.WriteAllText(files[number-1].ToString(), message);
                 body = "File Number " + number.ToString() + " was changed";
-                return new Response("text/plain", "200 Request sucess", body);
+                string[] secondResponse = { "text/plain", "200 Request sucess", body };
+                return secondResponse;
 
             }
 
@@ -350,14 +359,6 @@ namespace REST_HTTP_Server
             }
 
         }
-
-
-
-
-
-
-
-
 
         //--------------------------------create Server Response Headers message-----------------------------------
         public void ServerResponse(NetworkStream stream) 
