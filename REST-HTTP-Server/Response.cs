@@ -9,7 +9,7 @@ using System.Text;
 
 namespace REST_HTTP_Server
 {
-    class Response
+    public class Response : IResponse
     {
 
         private String Data;
@@ -53,7 +53,7 @@ namespace REST_HTTP_Server
         }
         //############################# Functions to handle Post Request ###################################
         //If request is POST--------------------------------------
-        private string[] PostHandler(Request request) 
+        public string[] PostHandler(Request request) 
         {
             
             if (request.Order != "/messages") 
@@ -86,7 +86,7 @@ namespace REST_HTTP_Server
        
 
         //----------------------make the actual file and get the new id back---------------------------
-        private string  CreateNewFile(string body, string path) 
+        public string  CreateNewFile(string body, string path) 
         {
             string ID = "";
             int data = 0;
@@ -139,7 +139,7 @@ namespace REST_HTTP_Server
         //########################### Functions to handle GET Request ########################################################
         
         //-------------------------------handle GET Request---------------------------------
-        private string[] GetHandler(Request request)
+        public string[] GetHandler(Request request)
         {
             
             if (request.Order == "/messages") //GET requet with all messages
@@ -166,7 +166,7 @@ namespace REST_HTTP_Server
         }
 
         //------------get all messages----------------------
-        private string[] GetAll(String path) 
+        public string[] GetAll(String path) 
         {
             string theWay = (AppDomain.CurrentDomain.BaseDirectory + path);
             String body = "";
@@ -194,7 +194,7 @@ namespace REST_HTTP_Server
 
        
         //----------------------------------------Gets on specific message---------------------------
-        private string[] GetOne(int number)
+        public string[] GetOne(int number)
         {
             String path = "/messages";
             
@@ -221,7 +221,7 @@ namespace REST_HTTP_Server
         //##############################Functions to handle the DELETE Request###################################################
 
 
-        private string[] DeleteHandler(Request request)
+        public string[] DeleteHandler(Request request)
         {
             int number = ValidOrder(request.Order);
 
@@ -237,7 +237,7 @@ namespace REST_HTTP_Server
             
         }
         //------------------------Delete the actual file-------------------------------------------- 
-        private string[] DeleteOne(int number) 
+        public string[] DeleteOne(int number) 
         {
             string body= "";
             string path = "/messages";
@@ -270,7 +270,7 @@ namespace REST_HTTP_Server
         //###################################Functions that handle the PUT Request#######################################
 
         //Hanldes the PUT Request over all
-        private string[] PutHandler(Request request)
+        public string[] PutHandler(Request request)
         {
             int number = ValidOrder(request.Order); //check if PUT request with special message (/messages/1) is valid and get the number of the message as int
 
@@ -300,7 +300,7 @@ namespace REST_HTTP_Server
         }
 
 
-        private string[] PutOne(int number, string message) 
+        public string[] PutOne(int number, string message) 
         {
             string path = "/messages";
             string body = "";
@@ -327,7 +327,7 @@ namespace REST_HTTP_Server
         //##############################################################################################################
 
         //-----------check if Ordermessage is valid and give messagenumber as int back------------
-        private static int ValidOrder(string order)
+        public int ValidOrder(string order)
         {
             String standard = "/messages";
             int number = 0;
@@ -361,7 +361,7 @@ namespace REST_HTTP_Server
         }
 
         //--------------------------------create Server Response Headers message-----------------------------------
-        public void ServerResponse(NetworkStream stream) 
+        public void ServerResponse(StreamWriter writer) 
         {
             int dataLength = Data.Length; 
             String header = "";
@@ -371,7 +371,7 @@ namespace REST_HTTP_Server
             header += "\n";
             header += Data;
             // Console.WriteLine(header + "\n");
-            StreamWriter writer = new StreamWriter(stream) { AutoFlush = true };
+            //StreamWriter writer = new StreamWriter(stream) { AutoFlush = true };
             writer.WriteLine(header);
         }
 

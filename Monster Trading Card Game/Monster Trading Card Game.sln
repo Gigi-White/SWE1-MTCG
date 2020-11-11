@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonsterTradingCardTests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "REST-HTTP-Server", "..\REST-HTTP-Server\REST-HTTP-Server.csproj", "{5D16F4DC-DD70-4D78-9EC4-52FDA6BBBDBE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "REST-HTTP-ServerTest", "..\REST-HTTP-ServerTest\REST-HTTP-ServerTest.csproj", "{667EA732-89B4-4F02-BFF1-A1A0C29B0C22}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "REST-HTTP-ServerTests", "..\REST-HTTP-ServerTest\REST-HTTP-ServerTests.csproj", "{667EA732-89B4-4F02-BFF1-A1A0C29B0C22}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

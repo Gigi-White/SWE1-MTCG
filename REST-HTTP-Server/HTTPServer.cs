@@ -11,11 +11,13 @@ using System.Xml.Serialization;
 
 namespace REST_HTTP_Server
 {
-    class HTTPServer
+    class HTTPServer : IHTTPServer
     {
 
         private bool running = false;
         private TcpListener listener;
+
+        private TcpClient myTcpClient;
 
 
         public HTTPServer(int port) 
@@ -23,33 +25,27 @@ namespace REST_HTTP_Server
             listener = new TcpListener(IPAddress.Any,port);
         }
         //Prgramstart
-        public void Start()
+       
+        //run the connection-----------------------------------------------------
+        public void Run() 
         {
-            //Zuerst wird die Directory erstellt
             string folderName = "messages";
             if (!Directory.Exists(folderName))
             {
                 Directory.CreateDirectory(folderName);
             }
-            //neuer Thread mit der Run Funktion wird erstellt
-            Thread serverThread = new Thread(new ThreadStart(Run));
-            serverThread.Start();
-        }
 
-
-        //run the connection-----------------------------------------------------
-        public void Run() 
-        {
             running = true;
             listener.Start();
             while (running) 
             {
                 Console.WriteLine("Waiting for connection...");
-                TcpClient client = listener.AcceptTcpClient();  //Connection with client
+                System.Net.Sockets.TcpClient client = GetClient();  //Connection with client
+                myTcpClient = new TcpClient(client);
                 Console.WriteLine("Client connected");
-                HandleClient(client); //hanlde function
+                HandleClient(); //hanlde function
 
-                client.Close();
+                myTcpClient.End();
                 
 
             }
@@ -57,15 +53,17 @@ namespace REST_HTTP_Server
             listener.Stop();
 
         }
+
         //handle the client----------------------------------------------
-        private void HandleClient(TcpClient client) 
+        public void HandleClient() 
         {
-            StreamReader reader = new StreamReader(client. GetStream()); //create reader
-            String msg = "";
-            while (reader.Peek() != -1) 
+            //StreamReader reader = new StreamReader(client. GetStream());
+            String msg = ReadStream();
+            /*while (reader.Peek() != -1) 
             {
                 msg += (char)reader.Read();   
-            }
+            }*/
+            
 
             Debug.WriteLine(msg);
             Request req = new Request(msg);  //create Request Object that has all the Request infos
@@ -76,8 +74,29 @@ namespace REST_HTTP_Server
             }
 
             Response resp = new Response(req); //make the response message with the "From" function
-            resp.ServerResponse(client.GetStream()); //send the response message
+            resp.ServerResponse(myTcpClient.GetStreamWriter()); //send the response message
 
+        }
+
+        //-------------------gets the TcpClient--------------------------
+        public System.Net.Sockets.TcpClient GetClient() 
+        {
+            System.Net.Sockets.TcpClient client = listener.AcceptTcpClient();
+
+            return client;
+        }
+
+        //--------------------------------gets the Stream by crerating a StreamReader and reads from it------------------------------------------
+        public string ReadStream()           
+        {
+            StreamReader reader = myTcpClient.GetStreamReader();//create reader
+
+            string msg = "";
+            while (reader.Peek() != -1)  //read from the Stream and save it in "msg"
+            {
+                msg += (char)reader.Read();
+            }
+            return msg;
         }
 
     }

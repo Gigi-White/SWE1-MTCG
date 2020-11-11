@@ -4,7 +4,7 @@ using System.Text;
 
 namespace REST_HTTP_Server
 {
-    class Request
+    public class Request
     { 
 
 

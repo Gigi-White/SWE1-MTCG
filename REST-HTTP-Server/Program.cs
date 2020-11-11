@@ -45,7 +45,7 @@ namespace REST_HTTP_Server
              }*/
             Console.WriteLine("Starting Server on Port 8080");
             HTTPServer server = new HTTPServer(8080);
-            server.Start();
+            server.Run();
 
 
 
