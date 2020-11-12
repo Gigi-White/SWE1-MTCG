@@ -16,19 +16,72 @@ namespace REST_HTTP_ServerTest
     [TestFixture]
     public class ServerTests
     {
-        
-        [Test]
+        //#################HTTP ServerTests###########################################
+        [Test] // Test if the function ReadStream gets the right text from the StreamReader
         public void ReadStreamTest()
         {
+
+           
+
             //arrange
-            
+            var myStream = new Mock<ITcpClient>();
+
+            //create my new StreamReader with my own text
+            string testString = "GET /messages HTTP/1.1";
+            UTF8Encoding encoding = new UTF8Encoding();
+            UnicodeEncoding uniEncoding = new UnicodeEncoding();
+
+            byte[] testArray = encoding.GetBytes(testString);
+
+            MemoryStream ms = new MemoryStream(testArray);
+
+            StreamReader sr = new StreamReader(ms);
+            //mock the GetStreamReader Function to return my selfmade Streamreader
+            myStream
+                .Setup(c => c.GetStreamReader())
+                .Returns(sr);
+
+            //act
+            HTTPServer myServer = new HTTPServer(myStream.Object);
+            string actual = myServer.ReadStream();
+
+            //assert
+            Assert.AreEqual(testString, actual);
+        
+        }
+
+        //##########################################################################
+
+
+        //#####################Request Tests########################################
+
+        [Test]  //Check if Request Constructor creates Request Object with the right values
+        public void RequestTest()
+        {
+            //arrange
+            string testMessage = "GET /messages HTTP/1.1\n" +
+                "User-Agent: PostmanRuntime/7.26.8\n" +
+                "Postman-Token: 6eb0f280-6486-402c-a24f-8a7cf1ffabf9\n" +
+                "Host: localhost:8080";
+
+            string testType = "GET";
+            string testOrder = "/messages";
+            string testVersion = "HTTP/1.1";
+            string[] testHeadRest = { "GET /messages HTTP/1.1", "User-Agent: PostmanRuntime/7.26.8", 
+                "Postman-Token: 6eb0f280-6486-402c-a24f-8a7cf1ffabf9", "Host: localhost:8080" };
 
 
             //act
-
+            Request actualRequest = new Request(testMessage);
             //assert
-
-            Assert.Pass();
+            Assert.AreEqual(testType, actualRequest.Type);
+            Assert.AreEqual(testOrder, actualRequest.Order);
+            Assert.AreEqual(testVersion, actualRequest.Version);
+            Assert.AreEqual(testHeadRest.ToList(), actualRequest.HeadRest);
         }
+
+        //############################################################################################
+
+        //####################################Response Tests##########################################
     }
 }

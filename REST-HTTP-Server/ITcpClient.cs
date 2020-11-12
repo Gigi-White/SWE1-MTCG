@@ -10,7 +10,7 @@ using System.Xml.Serialization;
 
 namespace REST_HTTP_Server
 {
-    interface ITcpClient
+    public interface ITcpClient
     {
         public StreamReader GetStreamReader();
         public StreamWriter GetStreamWriter();

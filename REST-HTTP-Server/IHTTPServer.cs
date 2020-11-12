@@ -15,7 +15,7 @@ namespace REST_HTTP_Server
         public void Run();
         public void HandleClient();
         public System.Net.Sockets.TcpClient GetClient();
-        //public string ReadStream(System.Net.Sockets.TcpClient client);
+        public string ReadStream();
 
 
 

@@ -11,21 +11,26 @@ using System.Xml.Serialization;
 
 namespace REST_HTTP_Server
 {
-    class HTTPServer : IHTTPServer
+    public class HTTPServer : IHTTPServer
     {
 
         private bool running = false;
         private TcpListener listener;
 
-        private TcpClient myTcpClient;
+        private ITcpClient myTcpClient;
 
 
         public HTTPServer(int port) 
         {
             listener = new TcpListener(IPAddress.Any,port);
         }
-        //Prgramstart
        
+        public HTTPServer(ITcpClient client)
+        {
+            myTcpClient = client;
+        }
+        //Prgramstart
+
         //run the connection-----------------------------------------------------
         public void Run() 
         {
@@ -72,8 +77,8 @@ namespace REST_HTTP_Server
             {      
                 Console.WriteLine(item.ToString());
             }
-
-            Response resp = new Response(req); //make the response message with the "From" function
+            FileHandler filehandler = new FileHandler();
+            Response resp = new Response(req, filehandler); //make the response message with the "From" function
             resp.ServerResponse(myTcpClient.GetStreamWriter()); //send the response message
 
         }

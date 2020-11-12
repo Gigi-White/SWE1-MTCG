@@ -6,18 +6,19 @@ using System.IO;
 using System.Net.Mime;
 using System.Net.Sockets;
 using System.Text;
+using System.Linq;
 
 namespace REST_HTTP_Server
 {
     public class Response : IResponse
     {
-
+        private FileHandler _fileHandler;
         private String Data;
         private String Status;
         private String Mime;
-        public Response(Request request) 
+        public Response(Request request,FileHandler filehandler) 
         {
-               
+            _fileHandler = filehandler;
             String[]mydata = From(request);
             Mime = mydata[0];
             Status = mydata[1];
@@ -58,7 +59,7 @@ namespace REST_HTTP_Server
             
             if (request.Order != "/messages") 
             {
-                string[] badResponse = { "text/plain", "404 Not Found", "" };
+                string[] badResponse = { "text/plain", "400 Bad Request", "" };
                 return badResponse;
             }
             String body = "";
@@ -93,18 +94,20 @@ namespace REST_HTTP_Server
             int current = 0;
             string filename = "";
             string theWay = (AppDomain.CurrentDomain.BaseDirectory + path);
-            DirectoryInfo directory = new DirectoryInfo(theWay);
-            FileInfo[] files = directory.GetFiles("*.txt");
+            //DirectoryInfo directory = new DirectoryInfo(theWay);
+            FileInfo[] files = _fileHandler.GetFileInfo(theWay);
+
             
             //if there is no file in the folder yet; 
             if (files.Length < 1) 
             {
                 filename = (theWay + "/" + "1.txt");
-                using (StreamWriter sw = File.CreateText(filename))
+                _fileHandler.NewMessage(body, filename);
+                /*using (StreamWriter sw = File.CreateText(filename))
                 {
                     sw.WriteLine(body);                
                 }
-           
+                */
                 ID = "Created new Id: 1";
                 return ID;
 
@@ -124,10 +127,11 @@ namespace REST_HTTP_Server
             }
             data++;
             filename = (theWay + "/" + data.ToString() + ".txt");
-            using (StreamWriter sw = File.CreateText(filename))
+            _fileHandler.NewMessage(body, filename);
+            /*using (StreamWriter sw = File.CreateText(filename))
             {
                 sw.WriteLine(body);
-            }
+            }*/
             ID = ("Created new Id: " + data.ToString());
             return ID;
         }
@@ -152,7 +156,7 @@ namespace REST_HTTP_Server
             
             if (message<0) //if ValidOrder is invalid  the int message will be -1 
             {
-                string[] badRequest = { "text/plain", "404 Not Found", "" };
+                string[] badRequest = { "text/plain", "400 Bad Response", "" };
                 return badRequest;
             }
             else 
@@ -170,21 +174,22 @@ namespace REST_HTTP_Server
         {
             string theWay = (AppDomain.CurrentDomain.BaseDirectory + path);
             String body = "";
-            DirectoryInfo directory = new DirectoryInfo(theWay);
-            FileInfo[] files = directory.GetFiles("*.txt");
+            //DirectoryInfo directory = new DirectoryInfo(theWay);
+            FileInfo[] files = _fileHandler.GetFileInfo(theWay);
+            //FileInfo[] files = directory.GetFiles("*.txt");
             if (files.Length == 0)
             {
                 body = "No files are available";
                 string[] firstResponse = { "text/plain", "200 Request sucess", body };
                 return firstResponse;
             }
-            
-            int number = 1;
+            body = _fileHandler.GetAllMessages(files);
+            /*int number = 1;
             foreach(var item in files)
             {
                 body += number.ToString() + ". Message:\n" + File.ReadAllText(item.ToString()) + "\n";
                 number++;
-            }
+            }*/
 
 
             string[] secondResponse = { "text/plain", "200 Request sucess", body };
@@ -200,8 +205,9 @@ namespace REST_HTTP_Server
             
             string theWay = (AppDomain.CurrentDomain.BaseDirectory + path);
             String body = "";
-            DirectoryInfo directory = new DirectoryInfo(theWay);
-            FileInfo[] files = directory.GetFiles("*.txt");
+            //DirectoryInfo directory = new DirectoryInfo(theWay);
+            FileInfo[] files = _fileHandler.GetFileInfo(theWay);
+            //FileInfo[] files = directory.GetFiles("*.txt");
             if (files.Length < number)
             {
                 body = "File Number " + number.ToString()  + " is not available";
@@ -210,7 +216,8 @@ namespace REST_HTTP_Server
             }
             else
             {
-                body += number.ToString() + ". Message:\n" + File.ReadAllText(files[number-1].ToString()) + "\n";
+                body = _fileHandler.GetOneMessage(files, number);
+                //body += number.ToString() + ". Message:\n" + File.ReadAllText(files[number-1].ToString()) + "\n";
                 string[] secondResponse = { "text/plain", "200 Request sucess", body };
                 return secondResponse;
             }
@@ -227,7 +234,7 @@ namespace REST_HTTP_Server
 
             if (number<0)
             {
-                string[] badResponse = { "text/plain", "404 Not Found", ""};
+                string[] badResponse = { "text/plain", "400 Bad Response", ""};
                 return badResponse;
             }
             else 
@@ -244,7 +251,8 @@ namespace REST_HTTP_Server
 
             string theWay = (AppDomain.CurrentDomain.BaseDirectory + path); //get the the path of the program (there also lies the message folder)
             DirectoryInfo directory = new DirectoryInfo(theWay);
-            FileInfo[] files = directory.GetFiles("*.txt");
+            FileInfo[] files = _fileHandler.GetFileInfo(theWay);
+            //FileInfo[] files = directory.GetFiles("*.txt");
             if (files.Length < number)
             {
                 body = "File Number " + number.ToString() + " is not available";
@@ -253,7 +261,8 @@ namespace REST_HTTP_Server
             }
             else
             {
-                File.Delete(files[number - 1].ToString());  //file gets deleted
+                _fileHandler.Delete(files,number);
+                //File.Delete(files[number - 1].ToString());  //file gets deleted
                 body = "File Number " + number.ToString() + " is deleted";
                 string[] secondResponse = { "text/plain", "200 Request sucess", body};
                 return secondResponse;
@@ -305,8 +314,9 @@ namespace REST_HTTP_Server
             string path = "/messages";
             string body = "";
             string theWay = (AppDomain.CurrentDomain.BaseDirectory + path); //get the the path of the program (there also lies the message folder)
-            DirectoryInfo directory = new DirectoryInfo(theWay);
-            FileInfo[] files = directory.GetFiles("*.txt");
+            //DirectoryInfo directory = new DirectoryInfo(theWay);
+            FileInfo[] files = _fileHandler.GetFileInfo(theWay);
+            //FileInfo[] files = directory.GetFiles("*.txt");
             if (files.Length < number)
             {
                 body = "File Number " + number.ToString() + " is not available";
@@ -314,7 +324,8 @@ namespace REST_HTTP_Server
                 return firstResponse;            }
             else
             {
-                File.WriteAllText(files[number-1].ToString(), message);
+                _fileHandler.Override(files, number, message);
+                //File.WriteAllText(files[number-1].ToString(), message);
                 body = "File Number " + number.ToString() + " was changed";
                 string[] secondResponse = { "text/plain", "200 Request sucess", body };
                 return secondResponse;
