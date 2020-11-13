@@ -12,18 +12,28 @@ namespace REST_HTTP_Server
 {
     public class Response : IResponse
     {
-        private FileHandler _fileHandler;
-        private String Data;
-        private String Status;
-        private String Mime;
-        public Response(Request request,FileHandler filehandler) 
+        private IFileHandler _fileHandler;
+        public String Status { get; set; }
+        public String Mime { get; set; }
+        public String Data { get; set; }
+
+        public Response(Request request,IFileHandler filehandler) 
         {
             _fileHandler = filehandler;
             String[]mydata = From(request);
-            Mime = mydata[0];
             Status = mydata[1];
+            Mime = mydata[0];
+ 
             Data = mydata[2];
 
+        }
+
+        public Response(string status, string mime, string data, IFileHandler filehandler) 
+        {
+            _fileHandler = filehandler;
+            Status = status;
+            Mime = mime;
+            Data = data;
         }
 
         //Build my Response values

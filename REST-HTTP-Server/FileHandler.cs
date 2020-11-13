@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace REST_HTTP_Server
 {
-    public class FileHandler
+    public class FileHandler : IFileHandler
     {
 
         //Create new message and new FileFolder if it does not exist yet

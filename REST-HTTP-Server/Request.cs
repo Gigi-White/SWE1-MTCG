@@ -25,6 +25,7 @@ namespace REST_HTTP_Server
                 HeadRest[0] = "";
 
             }
+
             else
             {
                 String[] tokens = request.Split("\n");
@@ -35,6 +36,7 @@ namespace REST_HTTP_Server
                 HeadRest = tokens;
             }
         }
+       
         //Get the sweet sweet Request infos----------------------------------
         /*public static Request GetRequest(String request) 
         {
@@ -56,10 +58,10 @@ namespace REST_HTTP_Server
 
         }
         */
-      
 
-      
-        
+
+
+
 
 
     }

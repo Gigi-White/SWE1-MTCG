@@ -20,9 +20,6 @@ namespace REST_HTTP_ServerTest
         [Test] // Test if the function ReadStream gets the right text from the StreamReader
         public void ReadStreamTest()
         {
-
-           
-
             //arrange
             var myStream = new Mock<ITcpClient>();
 
@@ -83,5 +80,159 @@ namespace REST_HTTP_ServerTest
         //############################################################################################
 
         //####################################Response Tests##########################################
+
+        [Test]
+        public void ConstructResponseGetTest()
+        {
+            //arrange
+            string testMessage = "GET /messages HTTP/1.1\n" +
+                "User-Agent: PostmanRuntime/7.26.8\n" +
+                "Postman-Token: 6eb0f280-6486-402c-a24f-8a7cf1ffabf9\n" +
+                "Host: localhost:8080";
+            
+            Request TestRequest = new Request(testMessage); //RequestObject wird erstellt
+
+            string message = "Dies ist meine Nachricht";
+            string[] files = { "1.txt", "2.txt", "3.txt", "4.txt", "5.txt" };
+
+            var fileHanlder = TestHelper.GeneratesFileHandlerMock(files, message); //gemockter Filehandler wird erstellt
+
+
+            string[] testArray = { "text/plain", "200 Request sucess", message };
+            //act
+            Response Actual = new Response(TestRequest, fileHanlder.Object);
+            //assert
+            Assert.AreEqual(testArray[1], Actual.Status);
+            Assert.AreEqual(testArray[0], Actual.Mime);
+            Assert.AreEqual(testArray[2], Actual.Data);
+
+
+        }
+
+        [Test]
+        public void ConstructResponsePostTest()
+        {
+            //arrange
+            string testMessage = "POST /messages HTTP/1.1\n" +
+                "User-Agent: PostmanRuntime/7.26.8\n" +
+                "Postman-Token: 6eb0f280-6486-402c-a24f-8a7cf1ffabf9\n" +
+                "Host: localhost:8080\n"+
+                "\r"+
+                "My new message";
+
+            Request TestRequest = new Request(testMessage);
+
+            string message = "Created new Id: 6";
+            string[] files = { "1.txt", "2.txt", "3.txt", "4.txt", "5.txt" };
+
+            var fileHanlder = TestHelper.GeneratesFileHandlerMock(files, message);
+
+
+            string[] testArray = { "text/plain", "200 Request sucess", message };
+            //act
+            Response Actual = new Response(TestRequest, fileHanlder.Object);
+            //assert
+            Assert.AreEqual(testArray[1], Actual.Status);
+            Assert.AreEqual(testArray[0], Actual.Mime);
+            Assert.AreEqual(testArray[2], Actual.Data);
+
+
+        }
+
+        [Test]
+        public void ConstructResponseDeleteTest()
+        {
+            //arrange
+            string testMessage = "DELETE /messages/3 HTTP/1.1\n" +
+                "User-Agent: PostmanRuntime/7.26.8\n" +
+                "Postman-Token: 6eb0f280-6486-402c-a24f-8a7cf1ffabf9\n" +
+                "Host: localhost:8080\n" +
+                "\r" +
+                "My new message";
+
+            Request TestRequest = new Request(testMessage);
+
+            string message = "File Number 3 is deleted";
+            string[] files = { "1.txt", "2.txt", "3.txt", "4.txt", "5.txt" };
+
+            var fileHanlder = TestHelper.GeneratesFileHandlerMock(files, message);
+
+
+            string[] testArray = { "text/plain", "200 Request sucess", message };
+            //act
+            Response Actual = new Response(TestRequest, fileHanlder.Object);
+            //assert
+            Assert.AreEqual(testArray[1], Actual.Status);
+            Assert.AreEqual(testArray[0], Actual.Mime);
+            Assert.AreEqual(testArray[2], Actual.Data);
+
+
+        }
+
+        [Test]
+        public void ConstructResponsePutTest()
+        {
+            //arrange
+            string testMessage = "PUT /messages/3 HTTP/1.1\n" +
+                "User-Agent: PostmanRuntime/7.26.8\n" +
+                "Postman-Token: 6eb0f280-6486-402c-a24f-8a7cf1ffabf9\n" +
+                "Host: localhost:8080\n" +
+                "\r" +
+                "My other message";
+
+            Request TestRequest = new Request(testMessage);
+
+            string message = "File Number 3 was changed";
+            string[] files = { "1.txt", "2.txt", "3.txt", "4.txt", "5.txt" };
+
+            var fileHanlder = TestHelper.GeneratesFileHandlerMock(files, message);
+
+
+            string[] testArray = { "text/plain", "200 Request sucess", message };
+            //act
+            Response Actual = new Response(TestRequest, fileHanlder.Object);
+            //assert
+            Assert.AreEqual(testArray[1], Actual.Status);
+            Assert.AreEqual(testArray[0], Actual.Mime);
+            Assert.AreEqual(testArray[2], Actual.Data);
+
+
+        }
+
+        [Test]
+        public void ResponseValidOrderTest1()
+        {
+            //arrange
+            string message = "some text, not important";
+            string[] files = { "1.txt", "2.txt", "3.txt", "4.txt", "5.txt" };
+            var fileHanlder = TestHelper.GeneratesFileHandlerMock(files, message);
+            string fakeOrder = "/messages/25";
+            int compare = 25;
+            Response myResponse = new Response ("200 Request sucess", "text/plain", "some text", fileHanlder.Object);
+
+
+            //act
+            int actual = myResponse.ValidOrder(fakeOrder);
+            //assert
+            Assert.AreEqual(compare, actual);
+        }
+        [Test]
+        public void ResponseValidOrderTest2()
+        {
+            //arrange
+            string message = "some text, not important";
+            string[] files = { "1.txt", "2.txt", "3.txt", "4.txt", "5.txt" };
+            var fileHanlder = TestHelper.GeneratesFileHandlerMock(files, message);
+            string fakeOrder = "/messages/ab25";
+            int compare = -1;
+            Response myResponse = new Response("200 Request sucess", "text/plain", "some text", fileHanlder.Object);
+
+
+            //act
+            int actual = myResponse.ValidOrder(fakeOrder);
+            //assert
+            Assert.AreEqual(compare, actual);
+        }
+
     }
 }
