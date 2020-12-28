@@ -14,8 +14,8 @@ namespace Monster_Trading_Card_Game
         [Test]//FireElfe nimmt gegen Drachen keinen Schaden
         public void FireElfeFightAgainstDragon()
         {
-            Card Legolas = new FireElfe();
-            Card Fuchur = new Dragon();
+            Card Legolas = new FireElfe(20);
+            Card Fuchur = new Dragon(50);
 
             Legolas.SetDamage(Fuchur, Fuchur.Attack(Legolas));
             var actualDamage = Legolas.Damage; 
@@ -28,8 +28,8 @@ namespace Monster_Trading_Card_Game
         [Test]//Goblins können Drachen keinen Schaden zufügen
         public void GoblinFightAgainstDragon()
         {
-            Card Smorph = new Goblin();
-            Card Smaug = new Dragon();
+            Card Smorph = new Goblin(10);
+            Card Smaug = new Dragon(35);
 
             var actualAttack = Smorph.Attack(Smaug);
 
@@ -40,8 +40,8 @@ namespace Monster_Trading_Card_Game
 
         public void KnightFightAgainstWaterSpell()
         {
-            Card Lancelot = new Knight();
-            Card AvadaKedavra = new WaterSpell();
+            Card Lancelot = new Knight(20);
+            Card AvadaKedavra = new WaterSpell(15);
 
             var actualAttack = Lancelot.Attack(AvadaKedavra);
             Assert.AreEqual(0, actualAttack);
@@ -51,9 +51,9 @@ namespace Monster_Trading_Card_Game
 
         public void KrakenFightAgainstWaterSpell()
         {
-            Card SquidKid = new Kraken();
+            Card SquidKid = new Kraken(40);
             
-            Card FireBall = new FireSpell();
+            Card FireBall = new FireSpell(30);
 
             SquidKid.SetDamage(FireBall, FireBall.Attack(SquidKid));
             var actualDamage = SquidKid.Damage;
@@ -66,8 +66,8 @@ namespace Monster_Trading_Card_Game
         
         public void WizzardFightAgainstOrk()
         {
-            Card Jaina = new Wizzard();
-            Card Thrall = new Ork();
+            Card Jaina = new Wizzard(25);
+            Card Thrall = new Ork(35);
 
             Jaina.SetDamage(Thrall, Thrall.Attack(Jaina));
 
@@ -80,8 +80,8 @@ namespace Monster_Trading_Card_Game
 
         public void MonsterCardFightAgainstSpellCard()
         {
-            Card Mordechai = new Ork();
-            Card Aquaknarre = new WaterSpell();
+            Card Mordechai = new Ork(30);
+            Card Aquaknarre = new WaterSpell(20);
 
             Mordechai.SetDamage(Aquaknarre, Aquaknarre.Attack(Mordechai));
             Aquaknarre.SetDamage(Mordechai, Mordechai.Attack(Aquaknarre));
@@ -90,8 +90,8 @@ namespace Monster_Trading_Card_Game
             var Orkdamage = Aquaknarre.Damage;
     
 
-            Assert.AreEqual(100, Orkdamage);
-            Assert.AreEqual(15, SpellDamage);
+            Assert.AreEqual(60, Orkdamage);
+            Assert.AreEqual(10, SpellDamage);
         }
 
 

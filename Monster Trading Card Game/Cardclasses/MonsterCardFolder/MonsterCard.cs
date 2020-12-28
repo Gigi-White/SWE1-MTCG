@@ -10,30 +10,29 @@ namespace Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder
         override public Element Element { get; }
         override public CardType Type { get; }
         override public CreatureType Creature { get; }
-        override public int AttackPower { get; }
-        override public int Damage { get; set; }
+        override public float AttackPower { get; }
+        override public float Damage { get; set; }
 
 
 
-        public MonsterCard(Element element, int attackPower, CreatureType creatureType)
+        public MonsterCard(Element element, float attackPower, CreatureType creatureType)
         {
             Type = CardType.Monster;
             Element = element;
-            AttackPower = attackPower;
             Creature = creatureType;
             AttackPower = attackPower;
             Damage = 0;
         }
         //Standardfunktion für Angriff. AttackPower wird ausgegeben
-        override public int Attack(Card card)
+        override public float Attack(Card card)
         {
             return AttackPower;
         }
         //Standardfunktion  erlittener Schaden. Bei Kampf gegen einen Spell wird das Element miteinberechnet
-        public override void SetDamage(Card card, int damage)
+        public override void SetDamage(Card card, float damage)
         {
             
-            int realDamage = damage;
+            float realDamage = damage;
 
             if (card.Type == CardType.Spell)
             {

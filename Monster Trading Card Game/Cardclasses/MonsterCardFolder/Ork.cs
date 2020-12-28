@@ -8,7 +8,7 @@ namespace Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder
     public class Ork : MonsterCard
     {
      
-        public Ork():base(Element.Normal,50,CreatureType.Ork)
+        public Ork(float attackPower) :base(Element.Normal, attackPower, CreatureType.Ork)
         {
         }
         //Ork hat von sich aus keine besonderen Eigenschaften

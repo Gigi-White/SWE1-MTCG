@@ -19,13 +19,13 @@ namespace MonsterTradingCardTests
             List<Card> DeckEins = new List<Card>();
             List<Card> DeckZwei = new List<Card>();
 
-            DeckEins.Add(new Dragon());
-            DeckEins.Add(new Dragon());
-            DeckEins.Add(new Dragon());
+            DeckEins.Add(new Dragon(45));
+            DeckEins.Add(new Dragon(50));
+            DeckEins.Add(new Dragon(48));
 
-            DeckZwei.Add(new Goblin());
-            DeckZwei.Add(new Goblin());
-            DeckZwei.Add(new Goblin());
+            DeckZwei.Add(new Goblin(20));
+            DeckZwei.Add(new Goblin(35));
+            DeckZwei.Add(new Goblin(30));
 
 
             Battle Fight = new Battle(DeckEins, DeckZwei, "Yugi", "Kaiba");
@@ -40,9 +40,9 @@ namespace MonsterTradingCardTests
             List<Card> DeckEins = new List<Card>();
             List<Card> DeckZwei = new List<Card>();
 
-            DeckZwei.Add(new Goblin());
-            DeckZwei.Add(new Goblin());
-            DeckZwei.Add(new Goblin());
+            DeckZwei.Add(new Goblin(32));
+            DeckZwei.Add(new Goblin(30));
+            DeckZwei.Add(new Goblin(35));
 
 
             Battle Fight = new Battle(DeckEins, DeckZwei, "Geralt", "Triss");

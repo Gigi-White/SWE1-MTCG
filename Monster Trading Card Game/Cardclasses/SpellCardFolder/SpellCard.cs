@@ -12,10 +12,10 @@ namespace Monster_Trading_Card_Game
         override public CardType Type { get; }
         override public CreatureType Creature { get; }
 
-        override public int AttackPower { get; }
-        override public int Damage { get; set; }
+        override public float AttackPower { get; }
+        override public float Damage { get; set; }
 
-        public SpellCard(Element element, int attackPower)
+        public SpellCard(Element element, float attackPower)
         {
             Element = element;
             Type = CardType.Spell;
@@ -25,9 +25,9 @@ namespace Monster_Trading_Card_Game
 
         }
         // Hier wird einfach Schaden ausgeteilt.
-        override public int Attack(Card card)
+        override public float Attack(Card card)
         {
-            int realdamage = AttackPower;
+            float realdamage = AttackPower;
             
             
             return realdamage;
@@ -35,10 +35,10 @@ namespace Monster_Trading_Card_Game
 
         // Hier wird der erlittene Schaden berechnet, je nachdem welches Element der Angreifer hat. 
 
-        public override void SetDamage(Card card, int damage)
+        public override void SetDamage(Card card, float damage)
         {
             
-            int realdamage = damage;
+            float realdamage = damage;
 
             if (this.Element == Element.Fire && card.Element == Element.Water || this.Element == Element.Water && card.Element == Element.Normal || this.Element == Element.Normal && card.Element == Element.Fire)
             {

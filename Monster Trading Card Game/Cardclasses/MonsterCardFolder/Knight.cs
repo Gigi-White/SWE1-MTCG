@@ -8,14 +8,14 @@ namespace Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder
     public class Knight : MonsterCard
     {
   
-        public Knight():base(Element.Normal, 40, CreatureType.Knight)
+        public Knight(float attackPower) :base(Element.Normal, attackPower, CreatureType.Knight)
         {
             
         }
         //Gegen Wasserspells kann der Knight nicht angreifen. Er ertrinkt einfach.
-        override public int Attack(Card card)
+        override public float Attack(Card card)
         {
-            int realDamage = AttackPower;
+            float realDamage = AttackPower;
             if(card.Type == CardType.Spell && card.Element == Element.Water)
             {
                 realDamage = 0;

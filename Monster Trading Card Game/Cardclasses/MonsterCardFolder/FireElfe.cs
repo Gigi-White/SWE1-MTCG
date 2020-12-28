@@ -7,14 +7,14 @@ namespace Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder
 {
     public class FireElfe : MonsterCard
     {
-        public FireElfe(): base(Element.Fire, 40, CreatureType.FireElve)
+        public FireElfe(float attackPower) : base(Element.Fire, attackPower, CreatureType.FireElve)
         {
 
         }
 
-        public override void SetDamage(Card card ,int damage)
+        public override void SetDamage(Card card ,float damage)
         {
-            int realDamage = damage;
+            float realDamage = damage;
 
             if (card.Type == CardType.Spell)
             {

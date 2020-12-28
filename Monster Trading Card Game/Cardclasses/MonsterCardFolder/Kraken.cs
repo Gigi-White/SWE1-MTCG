@@ -7,15 +7,15 @@ namespace Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder
 {
     public class Kraken :MonsterCard
     {
-        public Kraken() : base(Element.Water, 50, CreatureType.Kraken)
+        public Kraken(float attackPower) : base(Element.Water, attackPower, CreatureType.Kraken)
         {
 
         }
 
         //Überschreibung des erlittenen Schadens. Der Kraken ist immun gegen Spell Angriffen
-        public override void SetDamage(Card card, int damage)
+        public override void SetDamage(Card card, float damage)
         {
-            int realDamage = damage;
+            float realDamage = damage;
             if (card.Type == CardType.Spell)
             {
                 realDamage = 0;

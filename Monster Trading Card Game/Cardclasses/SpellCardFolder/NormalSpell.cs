@@ -6,7 +6,7 @@ namespace Monster_Trading_Card_Game
 {
     public class NormalSpell : SpellCard
     {
-        public NormalSpell() : base(Element.Normal, 30)
+        public NormalSpell(float attackPower) : base(Element.Normal, attackPower)
         {
 
         }

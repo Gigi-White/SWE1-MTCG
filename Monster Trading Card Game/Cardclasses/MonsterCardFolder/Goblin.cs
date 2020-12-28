@@ -9,19 +9,19 @@ namespace Monster_Trading_Card_Game
     public class Goblin : MonsterCard
     {
 
-        public Goblin() : base(Element.Normal, 30,CreatureType.Goblin)
+        public Goblin(float attackPower) : base(Element.Normal, attackPower,CreatureType.Goblin)
         {
 
         }
 
-        override public int Attack(Card card)
+        override public float Attack(Card card)
         {
-            int realdamage = AttackPower;
+            float realDamage = AttackPower;
             if (card.Creature == CreatureType.Dragon)
             {
-                realdamage = 0;
+                realDamage = 0;
             }
-            return realdamage;
+            return realDamage;
         }
        
 

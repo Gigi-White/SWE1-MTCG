@@ -13,13 +13,13 @@ namespace Monster_Trading_Card_Game
         public abstract CardType Type { get;}
         public abstract CreatureType Creature { get; }
 
-        public abstract int AttackPower { get; }
+        public abstract float AttackPower { get; }
 
-        public abstract int Damage { get; set; }
+        public abstract float Damage { get; set; }
 
-        public abstract int Attack(Card card);
+        public abstract float Attack(Card card);
 
-        public abstract void SetDamage(Card card, int damage);
+        public abstract void SetDamage(Card card, float damage);
 
     }
 
