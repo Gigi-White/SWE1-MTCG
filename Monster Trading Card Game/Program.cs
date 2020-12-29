@@ -1,5 +1,7 @@
 ﻿using Npgsql;
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 
 namespace Monster_Trading_Card_Game
@@ -10,17 +12,15 @@ namespace Monster_Trading_Card_Game
         {
             Console.WriteLine("Hello World!");
 
-            var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
+            IDatabasehandler handler = new Databasehandler();
 
-            using var con = new NpgsqlConnection(cs);
-            con.Open();
+         
 
-            var sql = "SELECT version()";
-
-            using var cmd = new NpgsqlCommand(sql, con);
-
-            var version = cmd.ExecuteScalar().ToString();
-            Console.WriteLine($"PostgreSQL version: {version}");
+            List<string> ausgabe = handler.selectPlayerCards("Gigi");
+            for (int i=0; i< ausgabe.Count; i++) 
+            {
+                Console.WriteLine(ausgabe[i]);
+            }
         }
     }
 }
