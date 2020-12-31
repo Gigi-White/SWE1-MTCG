@@ -1,8 +1,9 @@
 ﻿using Npgsql;
+using REST_HTTP_Server;
 using System;
 using System.Collections.Generic;
 using System.Text;
-
+using System.Threading;
 
 namespace Monster_Trading_Card_Game
 {
@@ -10,17 +11,17 @@ namespace Monster_Trading_Card_Game
     {
         static void Main(String[] args)
         {
-            Console.WriteLine("Hello World!");
+            int MaxThreadsCount = Environment.ProcessorCount * 4;
+            ThreadPool.SetMaxThreads(MaxThreadsCount, MaxThreadsCount);
+            ThreadPool.SetMinThreads(2, 2);
 
-            IDatabasehandler handler = new Databasehandler();
 
-         
+            Console.WriteLine("Starting Server on Port 10001");
+            HTTPServer server = new HTTPServer(10001);
 
-            List<string> ausgabe = handler.selectPlayerCards("Gigi");
-            for (int i=0; i< ausgabe.Count; i++) 
-            {
-                Console.WriteLine(ausgabe[i]);
-            }
+            server.Run();
+
+
         }
     }
 }

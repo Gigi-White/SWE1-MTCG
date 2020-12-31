@@ -7,7 +7,7 @@ namespace Monster_Trading_Card_Game
     public interface IDatabasehandler
     {
         //inserts------------------------------------------------------------------------------
-        public bool insertPlayer(string name, string password);
+        public bool insertPlayer(string name, string password, bool isadmin);
 
         public bool insertBooster(int id);
 
@@ -31,6 +31,8 @@ namespace Monster_Trading_Card_Game
 
         public bool updatePlayerCardDeck(string card, bool inDeck);
 
+        public bool updateBoosterUsed(int boosterID);
+
         //delete
 
         public bool deleteTrade(string card);
@@ -40,6 +42,20 @@ namespace Monster_Trading_Card_Game
 
         public int selectPlayerCreated(string playername);
 
+        public int selectPlayerPassword(string playername, string password);
+
         public List<string> selectPlayerCards(string playername);
+
+        public List<string> selectPlayerDeck(string playername);
+
+        public string selectPlayerPoints(string playername);
+
+        public List<string> selectPlayerScoreboard();
+
+        public List<string> selectTradingOfferings();
+
+        public List<string> selectBoosterCard(int boosterid);
+
+        public List<int> selectBoosterNotUsed();
     }
 }

@@ -13,7 +13,7 @@ namespace Monster_Trading_Card_Game
         //insert player-----------------------------------------------
 
 
-        public bool insertPlayer(string name, string password)
+        public bool insertPlayer(string name, string password, bool isadmin)
         {
             try
             {
@@ -22,11 +22,12 @@ namespace Monster_Trading_Card_Game
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
 
-                var sql = "INSERT INTO player(playername, playerpassword, coins, points) VALUES(@name, @password,20,100)";
+                var sql = "INSERT INTO player(playername, playerpassword, coins, points, isadmin) VALUES(@name, @password,20,100,@isadmin)";
                 using var cmd = new NpgsqlCommand(sql, con);
 
                 cmd.Parameters.AddWithValue("name", name);
                 cmd.Parameters.AddWithValue("password", password);
+                cmd.Parameters.AddWithValue("isadmin", isadmin);
                 cmd.Prepare();
 
                 cmd.ExecuteNonQuery();
@@ -124,7 +125,8 @@ namespace Monster_Trading_Card_Game
                 return false;
             }
         }
-
+        
+        //insert into playercard---------------------------------------------------------------
         public bool insertPlayerCard(string player, string cardid) 
         {
             try
@@ -149,6 +151,8 @@ namespace Monster_Trading_Card_Game
             }
         }
 
+
+        //insert into traiding table------------------------------------ 
         public bool insertTrading(string player, string cardid, double damage, string type) 
         {
             try
@@ -287,7 +291,7 @@ namespace Monster_Trading_Card_Game
 
         //---------------------------------------update playercard------------------------------------
 
-        //changes ownership of card after trade
+        //changes ownership of card after trade------------------------------------------------------
         public bool updatePlayerCardTrade(string tradecard, string newowner)
         {
             try
@@ -312,7 +316,7 @@ namespace Monster_Trading_Card_Game
             }
         }
 
-        //changes on Table if card is in deck or not
+        //changes on Table if card is in deck or not-------------------------------------
         public bool updatePlayerCardDeck(string card, bool inDeck)
         {
             try
@@ -338,6 +342,35 @@ namespace Monster_Trading_Card_Game
                 Console.WriteLine("Error while trying update PlayerCardDeck");
                 return false;
             }
+        }
+
+
+        //update Booster when it is used-----------------------------------------------
+        public bool updateBoosterUsed(int boosterID)
+        {
+            try
+            {
+                var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
+
+                using var con = new NpgsqlConnection(cs);
+                con.Open();
+
+                var sql = "UPDATE booster SET available = false WHERE boosterid = @boosterID";
+            
+           
+                using var cmd = new NpgsqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("boosterID", boosterID);
+                cmd.Prepare();
+                cmd.ExecuteNonQuery();
+                Console.WriteLine("row updated");
+                return true;
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error while trying to update booster");
+                return false;
+            }
+
         }
 
         //############################## delete #########################################
@@ -369,9 +402,12 @@ namespace Monster_Trading_Card_Game
 
         }
 
+        
+
+
         //##################################select statements###########################
 
-        //check if player is already created
+        //check if player is already created-----------------------------------------------------
         public int selectPlayerCreated(string playername)
         {
 
@@ -404,34 +440,317 @@ namespace Monster_Trading_Card_Game
                 return 2;
             }
         }
-
-        //select all cards of player. Gives info back as a List of strings
-        public List<string> selectPlayerCards(string player)
+        //check if username and password is right
+        public int selectPlayerPassword(string playername, string password) 
         {
-            var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
-
-            using var con = new NpgsqlConnection(cs);
-            con.Open();
-
-            var sql = "SELECT cardname, damage, cardtype, element, indeck FROM card INNER JOIN playercard ON card.cardid = playercard.cardid WHERE player = @player";
-            
-            using var cmd = new NpgsqlCommand(sql, con);
-            cmd.Parameters.AddWithValue("player", player);
-            cmd.Prepare();
-
-            using NpgsqlDataReader rdr = cmd.ExecuteReader();
-
-            int count = 1;
-            List<string> cardData = new List<string>();
-
-            while (rdr.Read())
+            try
             {
-                string oneline = count.ToString() + ". Name: " + rdr.GetString(0) + " /Damage: " + rdr.GetInt32(1).ToString() + " /Cardtype: " + rdr.GetString(2) + " /Element: " + rdr.GetString(3) + " /In deck?: " + rdr.GetBoolean(4).ToString();
-                cardData.Add(oneline);
-                count++;
+                var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
+
+                using var con = new NpgsqlConnection(cs);
+                con.Open();
+
+                var sql = "SELECT COUNT(*) FROM player WHERE playername = @playername AND playerpassword = @password";
+
+                using var cmd = new NpgsqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("playername", playername);
+                cmd.Parameters.AddWithValue("password", password);
+                cmd.Prepare();
+
+                using NpgsqlDataReader rdr = cmd.ExecuteReader();
+
+                int count = 0;
+                while (rdr.Read())
+                {
+                    count = rdr.GetInt32(0);
+
+                }
+
+                return count;
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error while checking if Player is already created");
+                return 2;
             }
 
-            return cardData;
         }
+
+
+
+
+        //select all cards of player. Gives info back as a List of strings -----------------------------------------
+        public List<string> selectPlayerCards(string player)
+        {
+            try
+            {
+                var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
+
+                using var con = new NpgsqlConnection(cs);
+                con.Open();
+
+                var sql = "SELECT cardname, damage, cardtype, element, indeck FROM card INNER JOIN playercard ON card.cardid = playercard.cardid WHERE player = @player";
+
+                using var cmd = new NpgsqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("player", player);
+                cmd.Prepare();
+
+                using NpgsqlDataReader rdr = cmd.ExecuteReader();
+
+                int count = 1;
+                List<string> cardData = new List<string>();
+
+                while (rdr.Read())
+                {
+                    string oneline = count.ToString() + ". Name: " + rdr.GetString(0) + " /Damage: " + rdr.GetInt32(1).ToString() + " /Cardtype: " + rdr.GetString(2) + " /Element: " + rdr.GetString(3) + " /In deck?: " + rdr.GetBoolean(4).ToString();
+                    cardData.Add(oneline);
+                    count++;
+                }
+
+                return cardData;
+            }
+            catch (Exception)
+            {
+                List<string> cardData = new List<string>();
+                cardData.Add("0");
+                return cardData;
+
+            }
+        }
+
+
+        //check deck of player
+        public List<string> selectPlayerDeck(string playername)
+        {
+            try
+            {
+                var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
+
+                using var con = new NpgsqlConnection(cs);
+                con.Open();
+
+                var sql = "SELECT cardname, damage, cardtype, element FROM card INNER JOIN playercard ON card.cardid = playercard.cardid WHERE player = @player AND indeck = true";
+
+                using var cmd = new NpgsqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("player", playername);
+                cmd.Prepare();
+
+                using NpgsqlDataReader rdr = cmd.ExecuteReader();
+
+                int count = 1;
+                List<string> cardData = new List<string>();
+
+                while (rdr.Read())
+                {
+                    string oneline = count.ToString() + ". Name: " + rdr.GetString(0) + " /Damage: " + rdr.GetInt32(1).ToString() + " /Cardtype: " + rdr.GetString(2) + " /Element: " + rdr.GetString(3);
+                    cardData.Add(oneline);
+                    count++;
+                }
+
+                if (cardData.Count == 0)
+                {
+                    cardData.Add("There is no card in your Deck");
+                }
+
+                return cardData;
+            }
+            catch (Exception)
+            {
+                List<string> cardData = new List<string>();
+                cardData.Add("0");
+                return cardData;
+
+            }
+        }
+
+        // get the stats (points) of the player
+        public string selectPlayerPoints(string playername) 
+        {
+            try
+            {
+                var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
+
+                using var con = new NpgsqlConnection(cs);
+                con.Open();
+
+                var sql = "SELECT points FROM player  WHERE playername = @player";
+
+                using var cmd = new NpgsqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("player", playername);
+                cmd.Prepare();
+
+                using NpgsqlDataReader rdr = cmd.ExecuteReader();
+
+
+                string cardData;
+
+                rdr.Read();              
+                cardData = "You gathered " + rdr.GetInt32(0) + " Points" ;
+           
+                return cardData;
+            }
+            catch (Exception)
+            {
+                string cardData = "0";
+                return cardData;
+
+            }
+
+        }
+
+        //get the overall scoreboard
+        public List<string> selectPlayerScoreboard() 
+        {
+            try
+            {
+                var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
+
+                using var con = new NpgsqlConnection(cs);
+                con.Open();
+
+                var sql = "SELECT playername, points FROM player ORDER BY points DESC";
+
+                using var cmd = new NpgsqlCommand(sql, con);
+
+                using NpgsqlDataReader rdr = cmd.ExecuteReader();
+
+                int count = 1;
+                List<string> cardData = new List<string>();
+
+                while (rdr.Read())
+                {
+                    string oneline = count.ToString() + ". Place: " + rdr.GetString(0) + " /Points: " + rdr.GetInt32(1).ToString();
+                    cardData.Add(oneline);
+                    count++;
+                }
+
+                return cardData;
+            }
+            catch (Exception)
+            {
+                List<string> cardData = new List<string>();
+                cardData.Add("0");
+                return cardData;
+
+            }
+
+        }
+
+
+
+        // check tradin angebote-----------------------------------------
+        public List<string> selectTradingOfferings() 
+        {
+            try
+            {
+                var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
+
+                using var con = new NpgsqlConnection(cs);
+                con.Open();
+
+                var sql = "SELECT t.playername, c.cardname, c.damage, c.cardtype, c.element, t.type, t.damage " +
+                            "FROM trading t INNER JOIN card c ON t.cardid = c.cardid";
+
+                using var cmd = new NpgsqlCommand(sql, con);
+
+                using NpgsqlDataReader rdr = cmd.ExecuteReader();
+
+                
+                List<string> cardData = new List<string>();
+
+                while (rdr.Read())
+                {
+                    string oneline =    rdr.GetString(0) + " offers " + rdr.GetString(1) + " /Damage: " + rdr.GetDouble(2).ToString() + " /Cardtype: " + rdr.GetString(3) + " /Element: " + rdr.GetString(4) +
+                                        "\nfor \n" +
+                                        "Cardtype: " + rdr.GetString(5) + " with at least " + rdr.GetDouble(6).ToString() + " damage \n";
+                    cardData.Add(oneline);
+                    
+                }
+
+                if (cardData.Count == 0)
+                {
+                    cardData.Add("There are no trade offerings at the moment");
+                }
+
+                return cardData;
+            }
+            catch (Exception)
+            {
+                List<string> cardData = new List<string>();
+                cardData.Add("0");
+                return cardData;
+
+            }
+
+        }
+        //get all card ids of a booster------------------------------------
+        public List<string> selectBoosterCard(int boosterid) 
+        {
+            try
+            {
+                var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
+
+                using var con = new NpgsqlConnection(cs);
+                con.Open();
+
+                var sql = "SELECT cardid FROM card INNER JOIN boostercard ON card.cardid = boostercard.cardid WHERE boosterid = @boosterid";
+
+                using var cmd = new NpgsqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("boosterid", boosterid);
+                cmd.Prepare();
+                using NpgsqlDataReader rdr = cmd.ExecuteReader();
+
+
+                List<string> cardData = new List<string>();
+
+                while (rdr.Read())
+                {
+                    cardData.Add(rdr.GetString(0));
+                }
+                return cardData;
+            }
+            catch (Exception)
+            {
+                List<string> cardData = new List<string>();
+                cardData.Add("0");
+                return cardData;
+
+            }
+
+        }
+        //get booster that are were not used yet-------------------------------
+        public List<int> selectBoosterNotUsed()
+        {
+            try
+            {
+                var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
+
+                using var con = new NpgsqlConnection(cs);
+                con.Open();
+
+                var sql = "SELECT boosterid FROM booster  WHERE available = true";
+
+                using var cmd = new NpgsqlCommand(sql, con);
+                using NpgsqlDataReader rdr = cmd.ExecuteReader();
+
+
+                List<int> boosterData = new List<int>();
+
+                while (rdr.Read())
+                {
+                    boosterData.Add(rdr.GetInt32(0));
+                }
+                return boosterData;
+            }
+            catch (Exception)
+            {
+                List<int> boosterData = new List<int>();
+                boosterData.Add(0);
+                return boosterData;
+
+            }
+        }
+
+
     }
 }

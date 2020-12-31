@@ -48,7 +48,8 @@ namespace REST_HTTP_Server
                 System.Net.Sockets.TcpClient client = GetClient();  //Connection with client
                 myTcpClient = new TcpClient(client);
                 Console.WriteLine("Client connected");
-                HandleClient(); //hanlde function
+                Thread objMyThread = new Thread(HandleClient); //hanlde function
+                objMyThread.Start();
 
                 myTcpClient.End();
                 
