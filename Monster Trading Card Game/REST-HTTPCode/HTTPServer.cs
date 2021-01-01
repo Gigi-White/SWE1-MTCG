@@ -7,8 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Threading;
-
-
+using System.Threading.Tasks;
 
 namespace REST_HTTP_Server
 {
@@ -34,14 +33,15 @@ namespace REST_HTTP_Server
         {
 
             running = true;
-            listener.Start(5);
+            listener.Start();
             
             while (running) 
             {
 
                 Console.WriteLine("Waiting for connection...");
-                var client = listener.AcceptTcpClient();  //Connection with client
+                TcpClient client = listener.AcceptTcpClient();  //Connection with client
 
+                
                 ThreadPool.QueueUserWorkItem(new WaitCallback (HandleClient), client);
 
                 
@@ -50,7 +50,7 @@ namespace REST_HTTP_Server
 
             }
             running = false;
-            listener.Stop();
+            //listener.Stop();
 
         }
 
@@ -73,6 +73,7 @@ namespace REST_HTTP_Server
             IMessageHandler handler = new MessageHandler(login, myTcpClient, req.Type, req.Order, req.authorization, req.body);
 
             
+
             if (req.Order == "/sessions")
             {
                 //only one thread after another is allowed to do that at the time----------------
@@ -81,8 +82,32 @@ namespace REST_HTTP_Server
             }
             else if(req.Order == "/packages") 
             {
-                handler.CreateBooster(login);
+                handler.CreateBooster(login);  //erstellen von boostern
             } 
+            else if (req.Order == "/transactions/packages")  //kaufen von boostern
+            {
+                handler.AcquirePackage(login);
+            }
+            else if (req.Order == "/cards")
+            {
+                handler.ShowCards(login);
+            }
+            else if (req.Order == "/deck") 
+            {
+                if(req.Type == "GET") 
+                {
+                    handler.ShowDeck(login,0);
+                }
+                else if (req.Type == "PUT")
+                {
+                    handler.SetDeck(login);
+                }
+            }
+            else if (req.Order == "/deck?format=plain" && req.Type =="GET")
+            {
+                handler.ShowDeck(login,1);
+            }
+
 
             else
             {
@@ -94,7 +119,7 @@ namespace REST_HTTP_Server
             //FileHandler filehandler = new FileHandler();
             //Response resp = new Response(req, filehandler); //make the response message with the "From" function
             //resp.ServerResponse(new StreamWriter (myTcpClient.GetStream()) { AutoFlush = true }); //send the response message
-            Thread.Sleep(2000);
+            //Thread.Sleep(2000);
             myTcpClient.Close();
             
 
@@ -112,7 +137,7 @@ namespace REST_HTTP_Server
         private string ReadStream(TcpClient myTcpClient)           
         {
             
-            StreamReader reader = new StreamReader(myTcpClient.GetStream()); //create reader
+            StreamReader reader = new StreamReader(myTcpClient.GetStream(), leaveOpen: true); //create reader
             
             
             string msg = "";

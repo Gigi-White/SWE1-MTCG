@@ -29,9 +29,10 @@ namespace Monster_Trading_Card_Game
 
         public bool updatePlayerCardTrade(string tradecard, string newowner);
 
-        public bool updatePlayerCardDeck(string card, bool inDeck);
+        public bool updatePlayerCardDeck(string playername, string card, bool inDeck);
 
         public bool updateBoosterUsed(int boosterID);
+
 
         //delete
 
@@ -46,15 +47,20 @@ namespace Monster_Trading_Card_Game
 
         public List<string> selectPlayerCards(string playername);
 
-        public List<string> selectPlayerDeck(string playername);
+        public List<string> selectPlayerDeck(string playername, int show);
+        public int selectPlayerDeckNumber(string playername);
 
         public string selectPlayerPoints(string playername);
 
+        public int selectPlayerCoins(string playername);
+
         public List<string> selectPlayerScoreboard();
+
+        public List<int> selectUnusedBooster();
 
         public List<string> selectTradingOfferings();
 
-        public List<string> selectBoosterCard(int boosterid);
+        public List<string> selectCardInBooster(int boosterid);
 
         public List<int> selectBoosterNotUsed();
     }

@@ -317,7 +317,7 @@ namespace Monster_Trading_Card_Game
         }
 
         //changes on Table if card is in deck or not-------------------------------------
-        public bool updatePlayerCardDeck(string card, bool inDeck)
+        public bool updatePlayerCardDeck(string playername, string card, bool inDeck)
         {
             try
             {
@@ -326,12 +326,13 @@ namespace Monster_Trading_Card_Game
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
                 
-                var sql = "UPDATE playercard SET indeck = @inDeck WHERE cardid = @card";
+                var sql = "UPDATE playercard SET indeck = @inDeck WHERE cardid = @card AND player =@playername";
                 
 
                 using var cmd = new NpgsqlCommand(sql, con);
                 cmd.Parameters.AddWithValue("inDeck", inDeck);
                 cmd.Parameters.AddWithValue("card", card);
+                cmd.Parameters.AddWithValue("playername", playername);
                 cmd.Prepare();
                 cmd.ExecuteNonQuery();
                 Console.WriteLine("row updated");
@@ -520,7 +521,7 @@ namespace Monster_Trading_Card_Game
 
 
         //check deck of player
-        public List<string> selectPlayerDeck(string playername)
+        public List<string> selectPlayerDeck(string playername, int show)
         {
             try
             {
@@ -539,14 +540,24 @@ namespace Monster_Trading_Card_Game
 
                 int count = 1;
                 List<string> cardData = new List<string>();
-
-                while (rdr.Read())
+                if (show == 0)
                 {
-                    string oneline = count.ToString() + ". Name: " + rdr.GetString(0) + " /Damage: " + rdr.GetInt32(1).ToString() + " /Cardtype: " + rdr.GetString(2) + " /Element: " + rdr.GetString(3);
-                    cardData.Add(oneline);
-                    count++;
+                    while (rdr.Read())
+                    {
+                        string oneline = count.ToString() + ". Name: " + rdr.GetString(0) + " /Damage: " + rdr.GetInt32(1).ToString() + " /Cardtype: " + rdr.GetString(2) + " /Element: " + rdr.GetString(3);
+                        cardData.Add(oneline);
+                        count++;
+                    }
                 }
-
+                else if (show == 1)
+                {
+                    while (rdr.Read()) 
+                    {
+                        string oneline = rdr.GetString(0) + "  " + rdr.GetInt32(1).ToString() + "  " + rdr.GetString(2) + "  " + rdr.GetString(3);
+                        cardData.Add(oneline);
+                       
+                    }
+                }
                 if (cardData.Count == 0)
                 {
                     cardData.Add("There is no card in your Deck");
@@ -562,6 +573,42 @@ namespace Monster_Trading_Card_Game
 
             }
         }
+
+
+        //get number of cards in players deck
+        public int selectPlayerDeckNumber(string playername)
+        {
+            try
+            {
+                var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
+
+                using var con = new NpgsqlConnection(cs);
+                con.Open();
+
+                var sql = "SELECT COUNT(*) FROM playercard WHERE player = @player AND indeck = true";
+
+                using var cmd = new NpgsqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("player", playername);
+                cmd.Prepare();
+
+                using NpgsqlDataReader rdr = cmd.ExecuteReader();
+
+
+                int decknumber;
+
+                rdr.Read();
+                decknumber = rdr.GetInt32(0);
+
+                return decknumber;
+            }
+            catch (Exception)
+            {
+                int decknumber = -1;
+                return decknumber;
+
+            }
+        }
+
 
         // get the stats (points) of the player
         public string selectPlayerPoints(string playername) 
@@ -596,6 +643,40 @@ namespace Monster_Trading_Card_Game
 
             }
 
+        }
+
+        // get the number of coins the user has
+        public int selectPlayerCoins(string playername)
+        {
+            int coins;
+            try
+            {
+                var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
+
+                using var con = new NpgsqlConnection(cs);
+                con.Open();
+
+                var sql = "SELECT coins FROM player  WHERE playername = @player";
+
+                using var cmd = new NpgsqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("player", playername);
+                cmd.Prepare();
+
+                using NpgsqlDataReader rdr = cmd.ExecuteReader();
+
+
+                string cardData;
+
+                rdr.Read();
+                coins =  rdr.GetInt32(0);
+
+                return coins;
+            }
+            catch (Exception)
+            {
+                coins  = -1;
+                return coins;
+            }  
         }
 
         //get the overall scoreboard
@@ -637,6 +718,42 @@ namespace Monster_Trading_Card_Game
         }
 
 
+        //get all booster ids that are were not used yet
+        public List<int> selectUnusedBooster() 
+        {
+            try 
+            { 
+                var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
+
+                using var con = new NpgsqlConnection(cs);
+                con.Open();
+
+                var sql = "SELECT boosterid FROM booster WHERE available = true";
+
+                using var cmd = new NpgsqlCommand(sql, con);
+
+                using NpgsqlDataReader rdr = cmd.ExecuteReader();
+
+          
+                List<int> boosterid = new List<int>();
+
+                while (rdr.Read())
+                {
+                    boosterid.Add (rdr.GetInt32(0));
+         
+                }
+
+                return boosterid;
+            }
+            catch (Exception)
+            {
+                List<int> boosterid = new List<int>();
+                boosterid.Add(0);
+                return boosterid;
+
+            }
+
+}
 
         // check tradin angebote-----------------------------------------
         public List<string> selectTradingOfferings() 
@@ -684,7 +801,7 @@ namespace Monster_Trading_Card_Game
 
         }
         //get all card ids of a booster------------------------------------
-        public List<string> selectBoosterCard(int boosterid) 
+        public List<string> selectCardInBooster(int boosterid) 
         {
             try
             {
@@ -693,7 +810,7 @@ namespace Monster_Trading_Card_Game
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
 
-                var sql = "SELECT cardid FROM card INNER JOIN boostercard ON card.cardid = boostercard.cardid WHERE boosterid = @boosterid";
+                var sql = "SELECT cardid FROM boostercard WHERE boosterid = @boosterid";
 
                 using var cmd = new NpgsqlCommand(sql, con);
                 cmd.Parameters.AddWithValue("boosterid", boosterid);

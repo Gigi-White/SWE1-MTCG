@@ -137,7 +137,206 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
             }
         }
 
+        //acquire packages-----------------------------------
 
+        public void AcquirePackage(List<string> login) 
+        {
+            bool isOnline = false;
+            
+
+            for (int i = 0; i < login.Count; i++)
+            {
+                if (login[i] == authorization)
+                {
+                    isOnline = true;
+                }
+            }
+            if (!isOnline)
+            {
+                string data = "\nuser is not logged in \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
+            int lenght = authorization.IndexOf("-mtcgToken");
+            string playername = authorization.Substring(0, lenght);
+
+            int coins = Database.selectPlayerCoins(playername);
+            if (coins < 5)
+            {
+                string data = "\nplayer has not enough coins \n";
+                string status = "200 Success";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
+            //----------andere Threads wärend ausführung stoppen--------------------------
+            List<int> boosterid = Database.selectUnusedBooster();
+            if (boosterid.Count == 0 || boosterid[0]== 0) 
+            {
+                string data = "\nno booster available \n";
+                string status = "200 Success";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            List<string> cards = Database.selectCardInBooster(boosterid[0]);
+            if (cards[0]=="0")
+            {
+                string data = "\nSorry, there was a database error \n";
+                string status = "200 Success";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            foreach(string mycard in cards) 
+            {
+                Database.insertPlayerCard(playername, mycard);
+            }
+            Database.updateBoosterUsed(boosterid[0]);
+            Database.updatePlayerCoins(playername, 5, false);
+            string mydata = "\nYou acquired a new booster pack \n";
+            string mystatus = "200 Success";
+            string mymime = "text/plain";
+            ServerResponse(mystatus, mymime, mydata);
+            //----------andere Threads wärend ausführung stoppen--------------------------
+
+        }
+
+        //shows the cards of user--------------------------
+        public void ShowCards(List<string> login) 
+        {
+            bool isOnline = false;
+            for (int i = 0; i < login.Count; i++)
+            {
+                if (login[i] == authorization)
+                {
+                    isOnline = true;
+                }
+            }
+            if (!isOnline)
+            {
+                string data = "\nuser is not logged in \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            int lenght = authorization.IndexOf("-mtcgToken");
+            string playername = authorization.Substring(0, lenght);
+
+            List<string> playercards=Database.selectPlayerCards(playername);
+            string message = "";
+            foreach(string card in playercards) 
+            {
+                message += card + "\n\n";
+            }
+            string mystatus = "200 Success";
+            string mymime = "text/plain";
+            ServerResponse(mystatus, mymime, message);
+            return;
+
+        }
+
+        //show Deck from user-------------------------
+        public void ShowDeck(List<string>login, int show) 
+        {
+            bool isOnline = false;
+            for (int i = 0; i < login.Count; i++)
+            {
+                if (login[i] == authorization)
+                {
+                    isOnline = true;
+                }
+            }
+            if (!isOnline)
+            {
+                string data = "\nuser is not logged in \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            int lenght = authorization.IndexOf("-mtcgToken");
+            string playername = authorization.Substring(0, lenght);
+
+            List<string> myDeck = Database.selectPlayerDeck(playername, show);
+            string message = "";
+            foreach (string card in myDeck)
+            {
+                message += card + "\n\n";
+            }
+            string mystatus = "200 Success";
+            string mymime = "text/plain";
+            ServerResponse(mystatus, mymime, message);
+            return;
+        }
+
+        //set your Deck-------------------------
+        public void SetDeck(List<string> login) 
+        {
+            bool isOnline = false;
+            for (int i = 0; i < login.Count; i++)
+            {
+                if (login[i] == authorization)
+                {
+                    isOnline = true;
+                }
+            }
+            if (!isOnline)
+            {
+                string data = "\nuser is not logged in \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            int lenght = authorization.IndexOf("-mtcgToken");
+            string playername = authorization.Substring(0, lenght);
+
+            JArray jasonArray = JArray.Parse(body);
+            if(jasonArray.Count < 4) 
+            {
+                string data = "\nyour deck needs 4 cards \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            if (jasonArray.Count > 4)
+            {
+                string data = "\nyour deck needs 4 cards \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
+            int inDeck = Database.selectPlayerDeckNumber(playername);
+            if (inDeck == 4)
+            {
+                string data = "\ndeck is already full \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
+
+            foreach (string cardid in jasonArray) 
+            {
+                Database.updatePlayerCardDeck(playername, cardid, true);
+            }
+            string mydata = "\nNew Cards in your Deck\n";
+            string mystatus = "200 Success";
+            string mymime = "text/plain";
+            ServerResponse(mystatus, mymime, mydata);
+            return;
+
+        }
 
 
         public bool CheckType() 

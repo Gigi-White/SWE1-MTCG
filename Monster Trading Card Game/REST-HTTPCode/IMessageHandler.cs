@@ -14,6 +14,16 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
 
         //extra methode that that creates booster when user is logged in
         public void CreateBooster(List<string> login);
+        //extra methode to buy a new booster
+        public void AcquirePackage(List<string>login);
+        // methode to show all cards
+        public void ShowCards(List<string> login);
+        // show deck of user
+        public void ShowDeck(List<string> login, int show);
+
+        //put cards in deck
+        public void SetDeck(List<string> login);
+       
 
         //checkout if message is Get Post------------------------------------
         public void CheckOrderGet();
