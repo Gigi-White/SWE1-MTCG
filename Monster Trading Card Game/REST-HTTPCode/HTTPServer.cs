@@ -5,9 +5,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Numerics;
 using System.Threading;
-using System.Threading.Tasks;
+
 
 namespace REST_HTTP_Server
 {
@@ -17,21 +16,27 @@ namespace REST_HTTP_Server
         private bool running = false;
         private TcpListener listener;
         public List<string> login;
+        
         //private ITcpClient myTcpClient;
 
 
         public HTTPServer(int port) 
         {
-            listener = new TcpListener(IPAddress.Any,port);
-            login = new List<string> ();
+            login = new List<string>();
+            listener = new TcpListener(IPAddress.Any, port);
+            
+           
         }
+
+
+
 
         //Prgramstart
 
         //run the connection-----------------------------------------------------
         public void Run()
         {
-
+            
             running = true;
             listener.Start();
             
@@ -44,21 +49,17 @@ namespace REST_HTTP_Server
                 
                 ThreadPool.QueueUserWorkItem(new WaitCallback (HandleClient), client);
 
-                
-
-                
-
             }
             running = false;
-            //listener.Stop();
-
+            listener.Stop();
+                      
         }
 
         //handle the client----------------------------------------------
-        private void HandleClient(Object client) 
+        private void HandleClient(Object myclient) 
         {
             Console.WriteLine("Client connected");
-            TcpClient myTcpClient = ((TcpClient)client);
+            TcpClient myTcpClient = ((TcpClient)myclient);
             String msg = ReadStream(myTcpClient);
             
             Debug.WriteLine(msg);
@@ -69,59 +70,29 @@ namespace REST_HTTP_Server
             {
                 Console.WriteLine(item.ToString());
             }
-
+            
             IMessageHandler handler = new MessageHandler(login, myTcpClient, req.Type, req.Order, req.authorization, req.body);
 
-            
-
-            if (req.Order == "/sessions")
+            if(req.Type=="POST" && req.Order == "/sessions") 
             {
                 //only one thread after another is allowed to do that at the time----------------
                 login = handler.LoginPlayer(login);
                 //------------------------------------------------------------------------------
             }
-            else if(req.Order == "/packages") 
+            else if(req.Type == "POST" && req.Order == "/users")
             {
-                handler.CreateBooster(login);  //erstellen von boostern
-            } 
-            else if (req.Order == "/transactions/packages")  //kaufen von boostern
-            {
-                handler.AcquirePackage(login);
+                handler.HandlePostUsers();
             }
-            else if (req.Order == "/cards")
+            else 
             {
-                handler.ShowCards(login);
+                handler.CheckType(login);
             }
-            else if (req.Order == "/deck") 
-            {
-                if(req.Type == "GET") 
-                {
-                    handler.ShowDeck(login,0);
-                }
-                else if (req.Type == "PUT")
-                {
-                    handler.SetDeck(login);
-                }
-            }
-            else if (req.Order == "/deck?format=plain" && req.Type =="GET")
-            {
-                handler.ShowDeck(login,1);
-            }
-
-
-            else
-            {
-                handler.CheckType();
-            }
-            
-            
 
             //FileHandler filehandler = new FileHandler();
             //Response resp = new Response(req, filehandler); //make the response message with the "From" function
             //resp.ServerResponse(new StreamWriter (myTcpClient.GetStream()) { AutoFlush = true }); //send the response message
-            //Thread.Sleep(2000);
+            Thread.Sleep(2000);
             myTcpClient.Close();
-            
 
         }
 

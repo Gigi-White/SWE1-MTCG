@@ -7,7 +7,7 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
     interface IMessageHandler
     {
 
-        public bool CheckType();
+        public void CheckType(List<string>login);
 
         //extra methode to login user / check if user is loged in 
         public List<string> LoginPlayer(List<string> login);
@@ -23,13 +23,16 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
 
         //put cards in deck
         public void SetDeck(List<string> login);
-       
+
+        //get all cards out of your deck
+        public void UnsetDeck(List<string> login);
+
 
         //checkout if message is Get Post------------------------------------
-        public void CheckOrderGet();
+        public void CheckOrderGet(List<string>login);
 
-        public void CheckOrderPost();
-        public void CheckoutOrderPut();
+        public void CheckOrderPost(List<string> login);
+        public void CheckoutOrderPut(List<string> login);
 
         public void WrongType();
 
@@ -43,9 +46,7 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
 
         //create player/user
         public void HandlePostUsers();
-        
-        //login player/user
-        public void HandlePostSession();
+       
 
 
     }

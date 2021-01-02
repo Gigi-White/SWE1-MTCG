@@ -11,6 +11,9 @@ namespace Monster_Trading_Card_Game
     {
         static void Main(String[] args)
         {
+            
+
+           
             int MaxThreadsCount = Environment.ProcessorCount * 4;
             ThreadPool.SetMaxThreads(MaxThreadsCount, MaxThreadsCount);
             ThreadPool.SetMinThreads(2, 2);

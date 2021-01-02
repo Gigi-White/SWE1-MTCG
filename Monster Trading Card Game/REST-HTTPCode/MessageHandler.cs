@@ -31,8 +31,122 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
             login = mylogin;
         }
 
+        public void CheckType(List<string>login)
+        {
+            switch (type)
+            {
+                case "GET":
+                    CheckOrderGet(login);
+                    break;
+                case "POST":
+                    CheckOrderPost(login);
+                    break;
+                case "PUT":
+                    CheckoutOrderPut(login);
+                    break;
+                default:
+                    WrongType();
+                    break;
+                
+            }
 
-        //extra thing for login---------------------------------------------
+            return;
+        }
+
+        public void CheckOrderGet(List<string>login)
+        {
+            switch (order) 
+            {
+                case "/cards":
+                    ShowCards(login);
+                    break;
+                case "/deck":
+                    ShowDeck(login, 0);
+                    break;
+                case "/deck?format=plain":
+                    ShowDeck(login, 1);
+                    break;
+                default:
+                    WrongOrder();
+                    break;
+
+
+            }
+        }
+
+        public void CheckOrderPost(List<string> login)
+        {
+            switch (order)
+            {
+                case "/packages":
+                    CreateBooster(login);
+                    break;
+                case "/transactions/packages":
+                    AcquirePackage(login);
+                    break;
+                default:
+                    WrongOrder();
+                    break;
+            }
+        }
+
+        public void CheckoutOrderPut(List<string> login)
+        {
+            switch (order)
+            {
+                case "/deck":
+                    SetDeck(login);
+                    break;
+                case "/deck/unset":
+                    UnsetDeck(login);
+                    break;
+                default:
+                   WrongOrder();
+                    break;
+
+            }
+        }
+
+
+
+
+        //Response when type is not known-----------------------
+        public void WrongType()
+        {
+            string data = "This Message has an unknown type";
+            string status = "404 Not Found";
+            string mime = "text/plain";
+            ServerResponse(status, mime, data);
+        }
+
+        //Response when order is not known------------------------
+        public void WrongOrder()
+        {
+            string data = "This Message has an unknown Order";
+            string status = "404 Not Found";
+            string mime = "text/plain";
+            ServerResponse(status, mime, data);
+        }
+
+        //sends response to client--------------------------------
+        public void ServerResponse(string status, string mime, string data)
+        {
+            StreamWriter writer = new StreamWriter(client.GetStream()) { AutoFlush = true };
+
+            int dataLength = data.Length;
+            String header = "";
+            header = "HTTP/1.1 " + status + "\n";
+            header += "Content-Type: " + mime + "\n";
+            header += "Content-Lenght: " + dataLength.ToString() + "\n";
+            header += "\n";
+            header += data;
+            // Console.WriteLine(header + "\n");
+            //StreamWriter writer = new StreamWriter(stream) { AutoFlush = true };
+            writer.WriteLine(header);
+        }
+
+
+        //login user---------------------------------------------
         public List<string> LoginPlayer(List<string>login) 
         {
             dynamic jasondata = JObject.Parse(body);
@@ -76,65 +190,59 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
             }
         }
 
-        //extra thing for creation of a booster-------------------------------------------
+        //creation of a booster-------------------------------------------
         public void CreateBooster(List<string> login) 
         {
             bool isOnline = false;
-            if (authorization == "admin-mtcgToken")
-            {
-                
-                for (int i = 0; i < login.Count; i++)
-                {
-                    if (login[i] == authorization)
-                    {
-                        isOnline = true;
-                    }
-                }
-
-                if (isOnline == true)
-                {
-                    
-                    JArray jasonArray = JArray.Parse(body);
-
-
-                    var myobject = jasonArray[0];
-                    int boosterid = (int)myobject["BoosterId"];
-                    Database.insertBooster(boosterid);
-
-
-                    for (int i = 1; i<jasonArray.Count; i++) 
-                    {
-                        string cardid = (string)jasonArray[i]["Id"];
-                        string cardname = (string)jasonArray[i]["Name"];
-                        double damage = (double)jasonArray[i]["Damage"];
-                        string cardType = (string)jasonArray[i]["Cardtype"];
-                        string element = (string)jasonArray[i]["Element"];
-
-                        Database.insertCard(cardid, cardname, damage, cardType, element);
-                        Database.insertBoosterCard(cardid, boosterid);
-                    }
-                    string data = "\nBooster was created \n";
-                    string status = "200 Success";
-                    string mime = "text/plain";
-                    ServerResponse(status, mime, data);
-
-
-                }
-                else
-                {
-                    string data = "\nAdmin not logged in \n";
-                    string status = "404 Not found";
-                    string mime = "text/plain";
-                    ServerResponse(status, mime, data);
-                }
-            }
-            else 
+            if (authorization != "admin-mtcgToken")
             {
                 string data = "\nyou are not the admin \n";
                 string status = "404 Not found";
                 string mime = "text/plain";
                 ServerResponse(status, mime, data);
+                return;
             }
+        
+                
+            for (int i = 0; i < login.Count; i++)
+            {
+                if (login[i] == authorization)
+                {
+                    isOnline = true;
+                }
+            }
+
+            if (isOnline == false)
+            {
+                string data = "\nAdmin not logged in \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            JArray jasonArray = JArray.Parse(body);
+
+
+            var myobject = jasonArray[0];
+            int boosterid = (int)myobject["BoosterId"];
+            Database.insertBooster(boosterid);
+
+
+            for (int i = 1; i<jasonArray.Count; i++) 
+            {
+                string cardid = (string)jasonArray[i]["Id"];
+                string cardname = (string)jasonArray[i]["Name"];
+                double damage = (double)jasonArray[i]["Damage"];
+                string cardType = (string)jasonArray[i]["Cardtype"];
+                string element = (string)jasonArray[i]["Element"];
+
+                Database.insertCard(cardid, cardname, damage, cardType, element);
+                Database.insertBoosterCard(cardid, boosterid);
+            }
+            string mydata = "\nBooster was created \n";
+            string mystatus = "200 Success";
+            string mymime = "text/plain";
+            ServerResponse(mystatus, mymime, mydata);     
         }
 
         //acquire packages-----------------------------------
@@ -338,59 +446,42 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
 
         }
 
-
-        public bool CheckType() 
+        //unset your deck
+        public void UnsetDeck(List<string> login) 
         {
-            switch (type)
+            bool isOnline = false;
+            for (int i = 0; i < login.Count; i++)
             {
-                case "GET":
-                    CheckOrderGet();
-                    break;
-                case "POST":
-                    CheckOrderPost();
-                    break;
-                case "PUT":
-                    CheckoutOrderPut();
-                    break;
-                default:
-                    WrongType();
-                    break;
+                if (login[i] == authorization)
+                {
+                    isOnline = true;
+                }
+            }
+            if (!isOnline)
+            {
+                string data = "\nuser is not logged in \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
             }
 
-            return true;
-        }
-
-        public void CheckOrderGet()
-        {
-
-        }
-
-        public void CheckOrderPost() 
-        {
-            switch (order)
-            {
-                case "/users":
-                    HandlePostUsers();
-                    break;
-            }
-        }
-
-        public void CheckoutOrderPut()
-        {
+            int lenght = authorization.IndexOf("-mtcgToken");
+            string playername = authorization.Substring(0, lenght);
+            Database.updatePlayerCardDeckEmpty(playername);
+            string mydata = "\n \n";
+            string mystatus = "200 Success";
+            string mymime = "text/plain";
+            ServerResponse(mystatus, mymime, mydata);
+            return;
 
         }
 
 
+      
 
-
-        //Response when type is not known-----------------------
-        public void WrongType() 
-        {
-            string data = "This Message has a unknown type";
-            string status = "404 Not Found";
-            string mime = "text/plain";
-            ServerResponse(status, mime, data);
-        }
+     
+ 
 
 
 
@@ -435,46 +526,10 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
             
 
         }
-        //login user
-        public void HandlePostSession() 
-        {
-        
-        }
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        //sends response to client--------------------------------
-        public void ServerResponse(string status, string mime, string data)
-        {
-            StreamWriter writer = new StreamWriter(client.GetStream()) { AutoFlush = true };
-
-            int dataLength = data.Length;
-            String header = "";
-            header = "HTTP/1.1 " + status + "\n";
-            header += "Content-Type: " + mime + "\n";
-            header += "Content-Lenght: " + dataLength.ToString() + "\n";
-            header += "\n";
-            header += data;
-            // Console.WriteLine(header + "\n");
-            //StreamWriter writer = new StreamWriter(stream) { AutoFlush = true };
-            writer.WriteLine(header);
-        }
 
 
     }

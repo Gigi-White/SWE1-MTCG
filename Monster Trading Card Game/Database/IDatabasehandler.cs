@@ -31,6 +31,8 @@ namespace Monster_Trading_Card_Game
 
         public bool updatePlayerCardDeck(string playername, string card, bool inDeck);
 
+        public bool updatePlayerCardDeckEmpty(string playername);
+
         public bool updateBoosterUsed(int boosterID);
 
 

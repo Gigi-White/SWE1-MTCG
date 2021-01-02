@@ -344,6 +344,32 @@ namespace Monster_Trading_Card_Game
                 return false;
             }
         }
+        //takes all cards out of your deck
+        public bool updatePlayerCardDeckEmpty(string playername) 
+        {
+            try
+            {
+                var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
+
+                using var con = new NpgsqlConnection(cs);
+                con.Open();
+
+                var sql = "UPDATE playercard SET indeck = false WHERE player =@playername";
+
+
+                using var cmd = new NpgsqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("playername", playername);
+                cmd.Prepare();
+                cmd.ExecuteNonQuery();
+                Console.WriteLine("row updated");
+                return true;
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error while trying update PlayerCardDeckEmpty");
+                return false;
+            }
+        }
 
 
         //update Booster when it is used-----------------------------------------------
@@ -663,9 +689,7 @@ namespace Monster_Trading_Card_Game
                 cmd.Prepare();
 
                 using NpgsqlDataReader rdr = cmd.ExecuteReader();
-
-
-                string cardData;
+          
 
                 rdr.Read();
                 coins =  rdr.GetInt32(0);
