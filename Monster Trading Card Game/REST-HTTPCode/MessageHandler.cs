@@ -55,6 +55,14 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
 
         public void CheckOrderGet(List<string>login)
         {
+            string name = CheckOrderUserAddition(order);
+            if (name != "")
+            {
+                GetUserData(login, name);
+                return;
+            }
+
+
             switch (order) 
             {
                 case "/cards":
@@ -66,6 +74,15 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
                 case "/deck?format=plain":
                     ShowDeck(login, 1);
                     break;
+                case "/stats":
+                    ShowPlayerStats(login);
+                    break;
+                case "/score":
+                    ShowPlayerScores(login);
+                    break;
+                case "/tradings":
+                    ShowTradingDeals(login);
+                    break;
                 default:
                     WrongOrder();
                     break;
@@ -76,6 +93,8 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
 
         public void CheckOrderPost(List<string> login)
         {
+            
+
             switch (order)
             {
                 case "/packages":
@@ -83,6 +102,9 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
                     break;
                 case "/transactions/packages":
                     AcquirePackage(login);
+                    break;
+                case "/tradings":
+                    PutOutTradingOffer(login);
                     break;
                 default:
                     WrongOrder();
@@ -92,6 +114,13 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
 
         public void CheckoutOrderPut(List<string> login)
         {
+            string name = CheckOrderUserAddition(order);
+            if (name != "")
+            {
+                ChangeUserData(login, name);
+                return;
+            }
+
             switch (order)
             {
                 case "/deck":
@@ -126,6 +155,18 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
             string status = "404 Not Found";
             string mime = "text/plain";
             ServerResponse(status, mime, data);
+        }
+
+        //check Order user addition
+        public string CheckOrderUserAddition (string order)
+        {
+            string name="";
+            if (order.Contains("/users/")&& order.Length>7)
+            {
+                name = order.Substring(7);
+            }
+
+            return name; 
         }
 
         //sends response to client--------------------------------
@@ -314,7 +355,7 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
 
         }
 
-        //shows the cards of user--------------------------
+        //shows the cards of user----------------------------------------------
         public void ShowCards(List<string> login) 
         {
             bool isOnline = false;
@@ -349,7 +390,7 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
 
         }
 
-        //show Deck from user-------------------------
+        //show Deck from user------------------------------------------------
         public void ShowDeck(List<string>login, int show) 
         {
             bool isOnline = false;
@@ -383,7 +424,7 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
             return;
         }
 
-        //set your Deck-------------------------
+        //set your Deck-------------------------------------------------
         public void SetDeck(List<string> login) 
         {
             bool isOnline = false;
@@ -446,7 +487,7 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
 
         }
 
-        //unset your deck
+        //unset your deck-----------------------------------------------------------
         public void UnsetDeck(List<string> login) 
         {
             bool isOnline = false;
@@ -477,16 +518,237 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
 
         }
 
+        //get user data-------------------------------------------------
+        public void GetUserData(List<string>login,string name)
+        {
+            bool isOnline = false;
+            for (int i = 0; i < login.Count; i++)
+            {
+                if (login[i] == authorization)
+                {
+                    isOnline = true;
+                }
+            }
+            if (!isOnline)
+            {
+                string data = "\nuser is not logged in \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            int lenght = authorization.IndexOf("-mtcgToken");
+            string playername = authorization.Substring(0, lenght);
 
-      
+            if (playername != name) 
+            {
+                string data = "\nyou cant get the info of another player \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
 
-     
- 
+            }
+            string playerdata = Database.selectPlayerData(name);
+            if (playerdata=="")
+            {
+                string data = "\nDatabase Error \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            else 
+            {
+                
+                string status = "200 Successs";
+                string mime = "text/plain";
+                ServerResponse(status, mime, playerdata);
+                return;
+            }
 
+        }
+
+        //change player data------------------------------------
+        public void ChangeUserData(List<string> login, string name) 
+        {
+            bool isOnline = false;
+            for (int i = 0; i < login.Count; i++)
+            {
+                if (login[i] == authorization)
+                {
+                    isOnline = true;
+                }
+            }
+            if (!isOnline)
+            {
+                string data = "\nuser is not logged in \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            int lenght = authorization.IndexOf("-mtcgToken");
+            string playername = authorization.Substring(0, lenght);
+
+            if (playername != name)
+            {
+                string data = "\nyou cant get the info of another player \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+
+            }
+            dynamic jasondata = JObject.Parse(body);
+            string newname = jasondata.Name;
+            string newbio = jasondata.Bio;
+            string newimage = jasondata.Image;
+
+
+            bool done = Database.updatePlayerData(playername, newname, newbio, newimage);
+            if (!done)
+            {
+                string data = "\nDatabase Error \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            else
+            {
+                string data = "\nPlayer Data was updated \n";
+                string status = "200 Successs";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
+
+        }
+
+
+        //show points of one player----------------------------------
+        public void ShowPlayerStats(List<string> login)
+        {
+            bool isOnline = false;
+            for (int i = 0; i < login.Count; i++)
+            {
+                if (login[i] == authorization)
+                {
+                    isOnline = true;
+                }
+            }
+            if (!isOnline)
+            {
+                string data = "\nuser is not logged in \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            int lenght = authorization.IndexOf("-mtcgToken");
+            string playername = authorization.Substring(0, lenght);
+            string mymessage = Database.selectPlayerPoints(playername);
+            if (mymessage == "0") 
+            {
+                string data = "\nDatabase Error \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            else
+            {
+                
+                string status = "200 Success";
+                string mime = "text/plain";
+                ServerResponse(status, mime, mymessage);
+            }
+
+
+        }
+
+
+        //show scoreboard
+        public void ShowPlayerScores(List<string> login) 
+        {
+            bool isOnline = false;
+            for (int i = 0; i < login.Count; i++)
+            {
+                if (login[i] == authorization)
+                {
+                    isOnline = true;
+                }
+            }
+            if (!isOnline)
+            {
+                string data = "\nuser is not logged in \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
+            string scoreboard = Database.selectPlayerScoreboard();
+            if (scoreboard == "0") 
+            {
+                string data = "\nDatabase Error \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+            }
+            else
+            {
+                string status = "200 Success";
+                string mime = "text/plain";
+                ServerResponse(status, mime, scoreboard);
+            }
+
+        }
+        public void ShowTradingDeals(List<string> login) 
+        {
+            bool isOnline = false;
+            for (int i = 0; i < login.Count; i++)
+            {
+                if (login[i] == authorization)
+                {
+                    isOnline = true;
+                }
+            }
+            if (!isOnline)
+            {
+                string data = "\nuser is not logged in \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
+            string tradingdeals = Database.selectTradingOfferings();
+
+            if(tradingdeals == "0") 
+            {
+                string data = "\nError in Database \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+
+            }
+            else 
+            {
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, tradingdeals);
+                return;
+            }
+
+        }
 
 
         //##################################### handle post requests ##################################################
-        
+
         //create user----------------------------------
         public void HandlePostUsers()
         {
@@ -523,7 +785,96 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
                     string mime = "text/plain";
                     ServerResponse(status, mime, data);
                 }
-            
+        }
+
+        //Put a card on the marketplace ------------------------------------------------
+        public void PutOutTradingOffer(List<string> login) 
+        {
+            bool isOnline = false;
+            for (int i = 0; i < login.Count; i++)
+            {
+                if (login[i] == authorization)
+                {
+                    isOnline = true;
+                }
+            }
+            if (!isOnline)
+            {
+                string data = "\nuser is not logged in \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
+            dynamic jasondata = JObject.Parse(body);
+            string cardId = jasondata.CardToTrade;
+            string tradeType = jasondata.Type;
+            double minimumDamage = jasondata.MinimumDamage;
+            string tradeId = jasondata.Id;
+
+
+            int lenght = authorization.IndexOf("-mtcgToken");
+            string username = authorization.Substring(0, lenght);
+
+            //ceck if card belongs to the player
+            int cardBelonsToUser = Database.selectCardBelongsToPlayer(username, cardId);
+            if (cardBelonsToUser == -1)
+            {
+                string data = "\nDatabase Error \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            if (cardBelonsToUser == 0)
+            {
+                string data = "\nYou dont own this card\n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
+
+
+            //check if card is in the deck
+            int inDeck = Database.selectCardInDeck(cardId);
+            if(inDeck == -1) 
+            {
+                string data = "\nDatabase Error \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            if(inDeck == 1)
+            {
+                string data = "\nCard can not be put on the marketplace as long as it is in your deck \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            //put card on the database table trading
+            bool done = Database.insertTrading(username, tradeId, cardId, minimumDamage, tradeType);
+
+            if (!done) 
+            {
+                string data = "\nDatabase Error \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            else
+            {
+                string data = "\nCard was put on the Marketplace \n";
+                string status = "200 Success";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
 
         }
 

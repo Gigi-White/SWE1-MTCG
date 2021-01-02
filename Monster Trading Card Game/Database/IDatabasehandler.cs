@@ -17,7 +17,7 @@ namespace Monster_Trading_Card_Game
 
         public bool insertPlayerCard(string player, string cardid);
 
-        public bool insertTrading(string player, string cardid, double damage, string type);
+        public bool insertTrading(string username, string tradeid, string cardid, double damage, string type);
 
 
         //updates------------------------------------------------------------------------------------
@@ -47,6 +47,8 @@ namespace Monster_Trading_Card_Game
 
         public int selectPlayerPassword(string playername, string password);
 
+        public string selectPlayerData(string playername);
+
         public List<string> selectPlayerCards(string playername);
 
         public List<string> selectPlayerDeck(string playername, int show);
@@ -56,14 +58,18 @@ namespace Monster_Trading_Card_Game
 
         public int selectPlayerCoins(string playername);
 
-        public List<string> selectPlayerScoreboard();
+        public string selectPlayerScoreboard();
 
         public List<int> selectUnusedBooster();
 
-        public List<string> selectTradingOfferings();
+        public string selectTradingOfferings();
 
         public List<string> selectCardInBooster(int boosterid);
 
-        public List<int> selectBoosterNotUsed();
+        public int selectCardInDeck(string cardId);
+
+        //check if certan card belongs to certen player
+        public int selectCardBelongsToPlayer(string username, string cardId);
+
     }
 }

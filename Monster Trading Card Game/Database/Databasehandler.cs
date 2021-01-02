@@ -18,13 +18,14 @@ namespace Monster_Trading_Card_Game
             try
             {
                 var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
-
+                string username = name;
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
 
-                var sql = "INSERT INTO player(playername, playerpassword, coins, points, isadmin) VALUES(@name, @password,20,100,@isadmin)";
+                //var sql = "INSERT INTO player(username, playername, playerpassword, coins, points, bio, image, isadmin) VALUES(@name,'Player', @password,20,100,'','',@isadmn)";
+                var sql = "INSERT INTO player (playername, playerpassword, coins, points, bio, image, isadmin, username) VALUES(@name, @password, 20, 100, '', '', @isadmin, @username)";
                 using var cmd = new NpgsqlCommand(sql, con);
-
+                cmd.Parameters.AddWithValue("username", username);
                 cmd.Parameters.AddWithValue("name", name);
                 cmd.Parameters.AddWithValue("password", password);
                 cmd.Parameters.AddWithValue("isadmin", isadmin);
@@ -127,7 +128,7 @@ namespace Monster_Trading_Card_Game
         }
         
         //insert into playercard---------------------------------------------------------------
-        public bool insertPlayerCard(string player, string cardid) 
+        public bool insertPlayerCard(string user, string cardid) 
         {
             try
             {
@@ -135,9 +136,9 @@ namespace Monster_Trading_Card_Game
 
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
-                var sql = "INSERT INTO playercard(player, cardid, indeck) VALUES(@player, @cardid, false)";
+                var sql = "INSERT INTO playercard(username, cardid, indeck) VALUES(@username, @cardid, false)";
                 using var cmd = new NpgsqlCommand(sql, con);
-                cmd.Parameters.AddWithValue("player", player);
+                cmd.Parameters.AddWithValue("username", user);
                 cmd.Parameters.AddWithValue("cardid", cardid);
                 cmd.Prepare();
                 cmd.ExecuteNonQuery();
@@ -153,7 +154,7 @@ namespace Monster_Trading_Card_Game
 
 
         //insert into traiding table------------------------------------ 
-        public bool insertTrading(string player, string cardid, double damage, string type) 
+        public bool insertTrading(string username,string tradeid, string cardid, double damage, string type) 
         {
             try
             {
@@ -161,12 +162,13 @@ namespace Monster_Trading_Card_Game
 
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
-                var sql = "INSERT INTO trading(playername, cardid, damage, type) VALUES(@player, @cardid, @damage, @type)";
+                var sql = "INSERT INTO trading(username, cardid, damage, type, tradeid) VALUES(@username, @cardid, @damage, @type, @tradeid)";
                 using var cmd = new NpgsqlCommand(sql, con);
-                cmd.Parameters.AddWithValue("player", player);
+                cmd.Parameters.AddWithValue("username", username);
                 cmd.Parameters.AddWithValue("cardid", cardid);
                 cmd.Parameters.AddWithValue("damage", damage);
                 cmd.Parameters.AddWithValue("type", type);
+                cmd.Parameters.AddWithValue("tradeid", tradeid);
                 cmd.Prepare();
                 cmd.ExecuteNonQuery();
                 Console.WriteLine("row inserted");
@@ -186,7 +188,7 @@ namespace Monster_Trading_Card_Game
 
         // update coins-----------------------
         // when plusMinus set true add coins, when plusMinus set false deduct coins
-        public bool updatePlayerCoins(string player, int coins, bool plusMinus) 
+        public bool updatePlayerCoins(string username, int coins, bool plusMinus) 
         {
             try
             {
@@ -198,16 +200,16 @@ namespace Monster_Trading_Card_Game
                 string sql;
                 if (plusMinus)
                 {
-                    sql = "UPDATE player SET coins = coins + @number WHERE playername = @player";
+                    sql = "UPDATE player SET coins = coins + @number WHERE username = @username";
                 }
                 else
                 {
-                    sql = "UPDATE player SET coins = coins - @number WHERE playername = @player";
+                    sql = "UPDATE player SET coins = coins - @number WHERE username = @username";
                     
                 }
 
                 using var cmd = new NpgsqlCommand(sql, con);
-                cmd.Parameters.AddWithValue("player", player);
+                cmd.Parameters.AddWithValue("username", username);
                 cmd.Parameters.AddWithValue("number", coins);
                 cmd.Prepare();
                 cmd.ExecuteNonQuery();
@@ -223,7 +225,7 @@ namespace Monster_Trading_Card_Game
         }
         //update points-----------------------------------------------
         // when plusMinus set true add points, when plusMinus set false deduct points
-        public bool updatePlayerPoints(string player, int points, bool plusMinus) 
+        public bool updatePlayerPoints(string username, int points, bool plusMinus) 
         {
             try
             {
@@ -235,16 +237,16 @@ namespace Monster_Trading_Card_Game
                 string sql;
                 if (plusMinus)
                 {
-                    sql = "UPDATE player SET points = points + @number WHERE playername = @player";
+                    sql = "UPDATE player SET points = points + @number WHERE username = @username";
                 }
                 else
                 {
-                    sql = "UPDATE player SET points = points - @number WHERE playername = @player";
+                    sql = "UPDATE player SET points = points - @number WHERE username = @username";
 
                 }
 
                 using var cmd = new NpgsqlCommand(sql, con);
-                cmd.Parameters.AddWithValue("player", player);
+                cmd.Parameters.AddWithValue("username", username);
                 cmd.Parameters.AddWithValue("number", points);
                 cmd.Prepare();
                 cmd.ExecuteNonQuery();
@@ -259,7 +261,7 @@ namespace Monster_Trading_Card_Game
             }
         }
         //update rest of player data--------------------
-        public bool updatePlayerData(string player, string newPlayerName, string newBio, string newImage)
+        public bool updatePlayerData(string username, string newPlayerName, string newBio, string newImage)
         {
             try
             {
@@ -267,12 +269,12 @@ namespace Monster_Trading_Card_Game
 
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
-                var sql = "UPDATE player SET playername = @newName, bio = @newBio, image = @newimage WHERE playername = @player";
+                var sql = "UPDATE player SET playername = @newName, bio = @newBio, image = @newimage WHERE username = @username";
                 using var cmd = new NpgsqlCommand(sql, con);
                 cmd.Parameters.AddWithValue("newName", newPlayerName);
                 cmd.Parameters.AddWithValue("newBio", newBio);
                 cmd.Parameters.AddWithValue("newimage", newImage);
-                cmd.Parameters.AddWithValue("player", player);
+                cmd.Parameters.AddWithValue("username", username);
                 cmd.Prepare();
                 cmd.ExecuteNonQuery();
 
@@ -300,7 +302,7 @@ namespace Monster_Trading_Card_Game
 
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
-                var sql = "UPDATE playercard SET player = @newowner, indeck = false WHERE cardid = @tradecard";
+                var sql = "UPDATE playercard SET username = @newowner, indeck = false WHERE cardid = @tradecard";
                 using var cmd = new NpgsqlCommand(sql, con);
                 cmd.Parameters.AddWithValue("newowner", newowner);
                 cmd.Parameters.AddWithValue("tradecard", tradecard);
@@ -317,7 +319,7 @@ namespace Monster_Trading_Card_Game
         }
 
         //changes on Table if card is in deck or not-------------------------------------
-        public bool updatePlayerCardDeck(string playername, string card, bool inDeck)
+        public bool updatePlayerCardDeck(string username, string card, bool inDeck)
         {
             try
             {
@@ -326,13 +328,13 @@ namespace Monster_Trading_Card_Game
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
                 
-                var sql = "UPDATE playercard SET indeck = @inDeck WHERE cardid = @card AND player =@playername";
+                var sql = "UPDATE playercard SET indeck = @inDeck WHERE cardid = @card AND username =@username";
                 
 
                 using var cmd = new NpgsqlCommand(sql, con);
                 cmd.Parameters.AddWithValue("inDeck", inDeck);
                 cmd.Parameters.AddWithValue("card", card);
-                cmd.Parameters.AddWithValue("playername", playername);
+                cmd.Parameters.AddWithValue("username", username);
                 cmd.Prepare();
                 cmd.ExecuteNonQuery();
                 Console.WriteLine("row updated");
@@ -345,7 +347,7 @@ namespace Monster_Trading_Card_Game
             }
         }
         //takes all cards out of your deck
-        public bool updatePlayerCardDeckEmpty(string playername) 
+        public bool updatePlayerCardDeckEmpty(string username) 
         {
             try
             {
@@ -354,11 +356,11 @@ namespace Monster_Trading_Card_Game
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
 
-                var sql = "UPDATE playercard SET indeck = false WHERE player =@playername";
+                var sql = "UPDATE playercard SET indeck = false WHERE username =@username";
 
 
                 using var cmd = new NpgsqlCommand(sql, con);
-                cmd.Parameters.AddWithValue("playername", playername);
+                cmd.Parameters.AddWithValue("username", username);
                 cmd.Prepare();
                 cmd.ExecuteNonQuery();
                 Console.WriteLine("row updated");
@@ -435,7 +437,7 @@ namespace Monster_Trading_Card_Game
         //##################################select statements###########################
 
         //check if player is already created-----------------------------------------------------
-        public int selectPlayerCreated(string playername)
+        public int selectPlayerCreated(string username)
         {
 
             try
@@ -445,10 +447,10 @@ namespace Monster_Trading_Card_Game
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
 
-                var sql = "SELECT COUNT(*) FROM player WHERE playername = @playername";
+                var sql = "SELECT COUNT(*) FROM player WHERE username = @username";
 
                 using var cmd = new NpgsqlCommand(sql, con);
-                cmd.Parameters.AddWithValue("playername", playername);
+                cmd.Parameters.AddWithValue("username", username);
                 cmd.Prepare();
 
                 using NpgsqlDataReader rdr = cmd.ExecuteReader();
@@ -468,7 +470,7 @@ namespace Monster_Trading_Card_Game
             }
         }
         //check if username and password is right
-        public int selectPlayerPassword(string playername, string password) 
+        public int selectPlayerPassword(string username, string password) 
         {
             try
             {
@@ -477,10 +479,10 @@ namespace Monster_Trading_Card_Game
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
 
-                var sql = "SELECT COUNT(*) FROM player WHERE playername = @playername AND playerpassword = @password";
+                var sql = "SELECT COUNT(*) FROM player WHERE username = @username AND playerpassword = @password";
 
                 using var cmd = new NpgsqlCommand(sql, con);
-                cmd.Parameters.AddWithValue("playername", playername);
+                cmd.Parameters.AddWithValue("username", username);
                 cmd.Parameters.AddWithValue("password", password);
                 cmd.Prepare();
 
@@ -503,11 +505,7 @@ namespace Monster_Trading_Card_Game
 
         }
 
-
-
-
-        //select all cards of player. Gives info back as a List of strings -----------------------------------------
-        public List<string> selectPlayerCards(string player)
+        public string selectPlayerData(string username) 
         {
             try
             {
@@ -516,10 +514,47 @@ namespace Monster_Trading_Card_Game
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
 
-                var sql = "SELECT cardname, damage, cardtype, element, indeck FROM card INNER JOIN playercard ON card.cardid = playercard.cardid WHERE player = @player";
+                var sql = "SELECT playername, coins, points, bio, image FROM player WHERE username = @username";
 
                 using var cmd = new NpgsqlCommand(sql, con);
-                cmd.Parameters.AddWithValue("player", player);
+                cmd.Parameters.AddWithValue("username", username);
+                cmd.Prepare();
+
+                using NpgsqlDataReader rdr = cmd.ExecuteReader();
+
+                string playerdata = "";
+                while (rdr.Read())
+                {
+                    playerdata = "\nName: " + rdr.GetString(0) + "  /Coins: " + rdr.GetInt32(1) + "  /Points: " + rdr.GetInt32(2) + "  /Bio: " + rdr.GetString(3) + "  /Image: " + rdr.GetString(4)+ "\n";
+
+                }
+
+                return playerdata;
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error while checking if Player is already created");
+                string playerdata = "0";
+                return playerdata;
+            }
+
+        }
+
+
+        //select all cards of player. Gives info back as a List of strings -----------------------------------------
+        public List<string> selectPlayerCards(string username)
+        {
+            try
+            {
+                var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
+
+                using var con = new NpgsqlConnection(cs);
+                con.Open();
+
+                var sql = "SELECT cardname, damage, cardtype, element, indeck FROM card INNER JOIN playercard ON card.cardid = playercard.cardid WHERE username = @username";
+
+                using var cmd = new NpgsqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("username", username);
                 cmd.Prepare();
 
                 using NpgsqlDataReader rdr = cmd.ExecuteReader();
@@ -547,7 +582,7 @@ namespace Monster_Trading_Card_Game
 
 
         //check deck of player
-        public List<string> selectPlayerDeck(string playername, int show)
+        public List<string> selectPlayerDeck(string username, int show)
         {
             try
             {
@@ -556,10 +591,10 @@ namespace Monster_Trading_Card_Game
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
 
-                var sql = "SELECT cardname, damage, cardtype, element FROM card INNER JOIN playercard ON card.cardid = playercard.cardid WHERE player = @player AND indeck = true";
+                var sql = "SELECT cardname, damage, cardtype, element FROM card INNER JOIN playercard ON card.cardid = playercard.cardid WHERE username = @username AND indeck = true";
 
                 using var cmd = new NpgsqlCommand(sql, con);
-                cmd.Parameters.AddWithValue("player", playername);
+                cmd.Parameters.AddWithValue("username", username);
                 cmd.Prepare();
 
                 using NpgsqlDataReader rdr = cmd.ExecuteReader();
@@ -602,7 +637,7 @@ namespace Monster_Trading_Card_Game
 
 
         //get number of cards in players deck
-        public int selectPlayerDeckNumber(string playername)
+        public int selectPlayerDeckNumber(string username)
         {
             try
             {
@@ -611,10 +646,10 @@ namespace Monster_Trading_Card_Game
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
 
-                var sql = "SELECT COUNT(*) FROM playercard WHERE player = @player AND indeck = true";
+                var sql = "SELECT COUNT(*) FROM playercard WHERE username = @username AND indeck = true";
 
                 using var cmd = new NpgsqlCommand(sql, con);
-                cmd.Parameters.AddWithValue("player", playername);
+                cmd.Parameters.AddWithValue("username", username);
                 cmd.Prepare();
 
                 using NpgsqlDataReader rdr = cmd.ExecuteReader();
@@ -637,7 +672,7 @@ namespace Monster_Trading_Card_Game
 
 
         // get the stats (points) of the player
-        public string selectPlayerPoints(string playername) 
+        public string selectPlayerPoints(string username) 
         {
             try
             {
@@ -646,10 +681,10 @@ namespace Monster_Trading_Card_Game
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
 
-                var sql = "SELECT points FROM player  WHERE playername = @player";
+                var sql = "SELECT playername, points FROM player  WHERE username = @username";
 
                 using var cmd = new NpgsqlCommand(sql, con);
-                cmd.Parameters.AddWithValue("player", playername);
+                cmd.Parameters.AddWithValue("username", username);
                 cmd.Prepare();
 
                 using NpgsqlDataReader rdr = cmd.ExecuteReader();
@@ -658,7 +693,7 @@ namespace Monster_Trading_Card_Game
                 string cardData;
 
                 rdr.Read();              
-                cardData = "You gathered " + rdr.GetInt32(0) + " Points" ;
+                cardData = "\n" +  rdr.GetString(0) + " gathered " + rdr.GetInt32(1) + " Points\n" ;
            
                 return cardData;
             }
@@ -672,7 +707,7 @@ namespace Monster_Trading_Card_Game
         }
 
         // get the number of coins the user has
-        public int selectPlayerCoins(string playername)
+        public int selectPlayerCoins(string username)
         {
             int coins;
             try
@@ -682,10 +717,10 @@ namespace Monster_Trading_Card_Game
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
 
-                var sql = "SELECT coins FROM player  WHERE playername = @player";
+                var sql = "SELECT coins FROM player  WHERE username = @username";
 
                 using var cmd = new NpgsqlCommand(sql, con);
-                cmd.Parameters.AddWithValue("player", playername);
+                cmd.Parameters.AddWithValue("username", username);
                 cmd.Prepare();
 
                 using NpgsqlDataReader rdr = cmd.ExecuteReader();
@@ -704,7 +739,7 @@ namespace Monster_Trading_Card_Game
         }
 
         //get the overall scoreboard
-        public List<string> selectPlayerScoreboard() 
+        public string selectPlayerScoreboard() 
         {
             try
             {
@@ -713,29 +748,27 @@ namespace Monster_Trading_Card_Game
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
 
-                var sql = "SELECT playername, points FROM player ORDER BY points DESC";
+                var sql = "SELECT playername, points FROM player WHERE isadmin = false ORDER BY points DESC";
 
                 using var cmd = new NpgsqlCommand(sql, con);
 
                 using NpgsqlDataReader rdr = cmd.ExecuteReader();
 
                 int count = 1;
-                List<string> cardData = new List<string>();
+                string scoreboard = "";
 
                 while (rdr.Read())
                 {
-                    string oneline = count.ToString() + ". Place: " + rdr.GetString(0) + " /Points: " + rdr.GetInt32(1).ToString();
-                    cardData.Add(oneline);
+                    scoreboard += "\n" +  count.ToString() + ". Place: " + rdr.GetString(0) + " /Points: " + rdr.GetInt32(1).ToString();
                     count++;
                 }
 
-                return cardData;
+                return scoreboard;
             }
             catch (Exception)
             {
-                List<string> cardData = new List<string>();
-                cardData.Add("0");
-                return cardData;
+                string scoreboard = "0";
+                return scoreboard;
 
             }
 
@@ -780,7 +813,7 @@ namespace Monster_Trading_Card_Game
 }
 
         // check tradin angebote-----------------------------------------
-        public List<string> selectTradingOfferings() 
+        public string selectTradingOfferings() 
         {
             try
             {
@@ -789,37 +822,34 @@ namespace Monster_Trading_Card_Game
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
 
-                var sql = "SELECT t.playername, c.cardname, c.damage, c.cardtype, c.element, t.type, t.damage " +
-                            "FROM trading t INNER JOIN card c ON t.cardid = c.cardid";
+                var sql = "SELECT p.playername, c.cardname, c.damage, c.cardtype, c.element, t.type, t.damage FROM trading t INNER JOIN card c ON t.cardid = c.cardid INNER JOIN player p ON t.username = p.username";
 
                 using var cmd = new NpgsqlCommand(sql, con);
 
                 using NpgsqlDataReader rdr = cmd.ExecuteReader();
 
                 
-                List<string> cardData = new List<string>();
+                string tradingOffers = "";
 
                 while (rdr.Read())
                 {
-                    string oneline =    rdr.GetString(0) + " offers " + rdr.GetString(1) + " /Damage: " + rdr.GetDouble(2).ToString() + " /Cardtype: " + rdr.GetString(3) + " /Element: " + rdr.GetString(4) +
+                    tradingOffers +=    "\n" + rdr.GetString(0) + " offers " + rdr.GetString(1) + " /Damage: " + rdr.GetDouble(2).ToString() + " /Cardtype: " + rdr.GetString(3) + " /Element: " + rdr.GetString(4) +
                                         "\nfor \n" +
                                         "Cardtype: " + rdr.GetString(5) + " with at least " + rdr.GetDouble(6).ToString() + " damage \n";
-                    cardData.Add(oneline);
                     
                 }
 
-                if (cardData.Count == 0)
+                if (tradingOffers == "")
                 {
-                    cardData.Add("There are no trade offerings at the moment");
+                    tradingOffers = "\nThere are no trade offerings at the moment\n";
                 }
 
-                return cardData;
+                return tradingOffers;
             }
             catch (Exception)
             {
-                List<string> cardData = new List<string>();
-                cardData.Add("0");
-                return cardData;
+                string tradingOffers = "0";
+                return tradingOffers;
 
             }
 
@@ -859,8 +889,8 @@ namespace Monster_Trading_Card_Game
             }
 
         }
-        //get booster that are were not used yet-------------------------------
-        public List<int> selectBoosterNotUsed()
+        //check if card is in deck---------------------
+        public int selectCardInDeck(string cardId) 
         {
             try
             {
@@ -869,27 +899,58 @@ namespace Monster_Trading_Card_Game
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
 
-                var sql = "SELECT boosterid FROM booster  WHERE available = true";
+                var sql = "SELECT COUNT(*) FROM playercard WHERE cardid = @cardid AND indeck = true";
 
                 using var cmd = new NpgsqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("cardid", cardId);
+                cmd.Prepare();
                 using NpgsqlDataReader rdr = cmd.ExecuteReader();
 
-
-                List<int> boosterData = new List<int>();
-
+                int inDeck = 0;
                 while (rdr.Read())
                 {
-                    boosterData.Add(rdr.GetInt32(0));
+                    inDeck = (rdr.GetInt32(0));
                 }
-                return boosterData;
+
+                return inDeck;
             }
             catch (Exception)
             {
-                List<int> boosterData = new List<int>();
-                boosterData.Add(0);
-                return boosterData;
-
+                return -1;
             }
+        }
+
+        public int selectCardBelongsToPlayer(string username, string cardId) 
+        {
+            try 
+            {
+                var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
+
+                using var con = new NpgsqlConnection(cs);
+                con.Open();
+
+                var sql = "SELECT COUNT(*) FROM playercard WHERE cardid = @cardid AND username = @username";
+
+                using var cmd = new NpgsqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("cardid", cardId);
+                cmd.Parameters.AddWithValue("username", username);
+                cmd.Prepare();
+                using NpgsqlDataReader rdr = cmd.ExecuteReader();
+
+                int belongsToUser = 0;
+                while (rdr.Read())
+                {
+                    belongsToUser = (rdr.GetInt32(0));
+                }
+
+                return belongsToUser;
+            }
+
+            catch(Exception)
+            {
+                return -1;
+            }
+        
         }
 
 
