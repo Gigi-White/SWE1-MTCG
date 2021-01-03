@@ -35,13 +35,15 @@ namespace Monster_Trading_Card_Game
 
         public bool updateBoosterUsed(int boosterID);
 
-
-        //delete
-
-        public bool deleteTrade(string card);
+        public bool updateCardBelongsToPlayer(string username, string cardId); 
 
 
-        //select
+        //delete---------------------------------------------------------------
+
+        public bool deleteTrade(string tradeId);
+
+
+        //select--------------------------------------------------------------------------
 
         public int selectPlayerCreated(string playername);
 
@@ -50,6 +52,10 @@ namespace Monster_Trading_Card_Game
         public string selectPlayerData(string playername);
 
         public List<string> selectPlayerCards(string playername);
+
+        public double selectCardDamage(string cardId);
+
+        public string selectCardType(string cardId); 
 
         public List<string> selectPlayerDeck(string playername, int show);
         public int selectPlayerDeckNumber(string playername);
@@ -68,8 +74,24 @@ namespace Monster_Trading_Card_Game
 
         public int selectCardInDeck(string cardId);
 
-        //check if certan card belongs to certen player
+        public List<string> selectCardIdInDeck(string username);
+
+        public List<string> selectCardData(string cardId);
+
+        //check if certan card belongs to certan player
         public int selectCardBelongsToPlayer(string username, string cardId);
+
+        //check if trading deal belongs to a certan player
+        public int selectTradeBelongsToPlayer(string username, string tradeId);
+
+        //check if trade exists
+        public int selectTradeExists(string tradeId);
+
+        //check if the trading card meets the trading condition
+        public int selectMeetsTradeCondition(string tradeId, double damage, string type);
+        //
+        public string selectCardInTrade(string tradeId);
+        public string selectUserInTrade(string tradeId);
 
     }
 }

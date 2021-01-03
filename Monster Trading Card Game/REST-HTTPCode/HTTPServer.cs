@@ -1,4 +1,5 @@
-﻿using Monster_Trading_Card_Game.REST_HTTPCode;
+﻿using Monster_Trading_Card_Game;
+using Monster_Trading_Card_Game.REST_HTTPCode;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,7 +17,11 @@ namespace REST_HTTP_Server
         private bool running = false;
         private TcpListener listener;
         public List<string> login;
-        
+        static object mylock = new object();
+        static object isThereAnoterPlayerLock = new object();
+        private string gamelog;
+        private int gamelockcheck;
+        private List<string> wantToBattle;
         //private ITcpClient myTcpClient;
 
 
@@ -24,8 +29,10 @@ namespace REST_HTTP_Server
         {
             login = new List<string>();
             listener = new TcpListener(IPAddress.Any, port);
-            
-           
+
+            gamelog = "";
+            gamelockcheck = 0;
+            wantToBattle = new List<string>();
         }
 
 
@@ -75,23 +82,45 @@ namespace REST_HTTP_Server
 
             if(req.Type=="POST" && req.Order == "/sessions") 
             {
-                //only one thread after another is allowed to do that at the time----------------
-                login = handler.LoginPlayer(login);
-                //------------------------------------------------------------------------------
+                lock (mylock)
+                {
+                    login = handler.LoginPlayer(login);
+                }
             }
             else if(req.Type == "POST" && req.Order == "/users")
             {
                 handler.HandlePostUsers();
             }
-            else 
+            else if (req.Type == "POST"  && req.Order == "/battles")
+            {
+
+                bool isOnline = false;
+                for (int i = 0; i < login.Count; i++)
+                {
+                    if (login[i] == req.authorization)
+                    {
+                        isOnline = true;
+                    }
+                }
+                if (!isOnline)
+                {
+                    string data = "\nuser is not logged in \n";
+                    string status = "404 Not found";
+                    string mime = "text/plain";
+                    handler.ServerResponse(status, mime, data);
+                }
+
+                else
+                {
+                    DoBattle(req.authorization);
+                }
+
+            }
+            else
             {
                 handler.CheckType(login);
             }
 
-            //FileHandler filehandler = new FileHandler();
-            //Response resp = new Response(req, filehandler); //make the response message with the "From" function
-            //resp.ServerResponse(new StreamWriter (myTcpClient.GetStream()) { AutoFlush = true }); //send the response message
-            Thread.Sleep(2000);
             myTcpClient.Close();
 
         }
@@ -118,6 +147,29 @@ namespace REST_HTTP_Server
             }
             //reader.Close();
             return msg;    
+        }
+
+        private bool DoBattle(string authorization) 
+        {
+
+            lock (isThereAnoterPlayerLock)
+            {
+                int lenght = authorization.IndexOf("-mtcgToken");
+                string playername = authorization.Substring(0, lenght);
+                wantToBattle.Add(playername);
+                int players = wantToBattle.Count;
+            
+                if (players >= 2)
+                {
+                    string firstPlayer = wantToBattle[players - 2];
+                    string secondPlayer = wantToBattle[players - 1];
+                    Battle myBattle = new Battle(firstPlayer, secondPlayer);
+                    myBattle.BattleHandler();
+                }
+            }
+
+
+            return true;
         }
 
     }

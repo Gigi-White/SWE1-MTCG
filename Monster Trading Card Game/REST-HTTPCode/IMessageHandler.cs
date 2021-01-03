@@ -12,7 +12,8 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
         public void CheckOrderGet(List<string> login);
 
         public void CheckOrderPost(List<string> login);
-        public void CheckoutOrderPut(List<string> login);
+        public void CheckOrderPut(List<string> login);
+        public void CheckOrderDelete(List<string> login);
 
         //unknown Type
         public void WrongType();
@@ -20,7 +21,7 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
         //unknown order
         public void WrongOrder();
         //additional method for orders with playername in it (/users/username)
-        public string CheckOrderUserAddition(string order);
+        public string CheckOrderUserAddition();
 
         //sends response back to Client
         public void ServerResponse(string status, string mime, string data);
@@ -47,6 +48,9 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
         // buy a new booster
         public void AcquirePackage(List<string> login);
 
+        public void MakeTradeDeal(List<string>login, string tradeId);
+
+
         // show all cards
         public void ShowCards(List<string> login);
 
@@ -68,6 +72,9 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
 
         //show User Data
         public void GetUserData(List<string> login, string name);
+
+        //Delete trade deal;
+        public void DeleteTradeDeal(List<string> login, string tradeid);
 
 
     }

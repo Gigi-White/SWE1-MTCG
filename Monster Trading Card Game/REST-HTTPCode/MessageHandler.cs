@@ -17,6 +17,7 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
         public string authorization;
         public string body;
         public List<string> login;
+        static object anotherLock = new object();
         IDatabasehandler Database;
 
 
@@ -42,7 +43,10 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
                     CheckOrderPost(login);
                     break;
                 case "PUT":
-                    CheckoutOrderPut(login);
+                    CheckOrderPut(login);
+                    break;
+                case "DELETE":
+                    CheckOrderDelete(login);
                     break;
                 default:
                     WrongType();
@@ -55,7 +59,7 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
 
         public void CheckOrderGet(List<string>login)
         {
-            string name = CheckOrderUserAddition(order);
+            string name = CheckOrderUserAddition();
             if (name != "")
             {
                 GetUserData(login, name);
@@ -93,7 +97,12 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
 
         public void CheckOrderPost(List<string> login)
         {
-            
+            string tradeId = CheckOrderTradingAdition();
+            if (tradeId != "")
+            {
+                MakeTradeDeal(login, tradeId);
+                return;
+            }
 
             switch (order)
             {
@@ -112,9 +121,9 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
             }
         }
 
-        public void CheckoutOrderPut(List<string> login)
+        public void CheckOrderPut(List<string> login)
         {
-            string name = CheckOrderUserAddition(order);
+            string name = CheckOrderUserAddition();
             if (name != "")
             {
                 ChangeUserData(login, name);
@@ -136,6 +145,16 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
             }
         }
 
+        public void CheckOrderDelete(List<string> login) 
+        {
+            string tradeid = CheckOrderTradingAdition();
+            if (tradeid != "")
+            {
+                DeleteTradeDeal(login, tradeid);
+                return;
+            }
+
+        }
 
 
 
@@ -158,7 +177,7 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
         }
 
         //check Order user addition
-        public string CheckOrderUserAddition (string order)
+        public string CheckOrderUserAddition()
         {
             string name="";
             if (order.Contains("/users/")&& order.Length>7)
@@ -168,6 +187,17 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
 
             return name; 
         }
+        public string CheckOrderTradingAdition() 
+        {
+            string tradeId = "";
+            if (order.Contains("/tradings/") && order.Length > 7)
+            {
+                tradeId = order.Substring(10);
+            }
+
+            return tradeId;
+        }
+
 
         //sends response to client--------------------------------
         public void ServerResponse(string status, string mime, string data)
@@ -322,36 +352,38 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
                 return;
             }
 
-            //----------andere Threads wärend ausführung stoppen--------------------------
-            List<int> boosterid = Database.selectUnusedBooster();
-            if (boosterid.Count == 0 || boosterid[0]== 0) 
+            lock (anotherLock)
             {
-                string data = "\nno booster available \n";
-                string status = "200 Success";
-                string mime = "text/plain";
-                ServerResponse(status, mime, data);
-                return;
+                List<int> boosterid = Database.selectUnusedBooster();
+                if (boosterid.Count == 0 || boosterid[0] == 0)
+                {
+                    string data = "\nno booster available \n";
+                    string status = "200 Success";
+                    string mime = "text/plain";
+                    ServerResponse(status, mime, data);
+                    return;
+                }
+                List<string> cards = Database.selectCardInBooster(boosterid[0]);
+                if (cards[0] == "0")
+                {
+                    string data = "\nSorry, there was a database error \n";
+                    string status = "200 Success";
+                    string mime = "text/plain";
+                    ServerResponse(status, mime, data);
+                    return;
+                }
+                foreach (string mycard in cards)
+                {
+                    Database.insertPlayerCard(playername, mycard);
+                }
+                Database.updateBoosterUsed(boosterid[0]);
+                Database.updatePlayerCoins(playername, 5, false);
+                string mydata = "\nYou acquired a new booster pack \n";
+                string mystatus = "200 Success";
+                string mymime = "text/plain";
+                ServerResponse(mystatus, mymime, mydata);
             }
-            List<string> cards = Database.selectCardInBooster(boosterid[0]);
-            if (cards[0]=="0")
-            {
-                string data = "\nSorry, there was a database error \n";
-                string status = "200 Success";
-                string mime = "text/plain";
-                ServerResponse(status, mime, data);
-                return;
-            }
-            foreach(string mycard in cards) 
-            {
-                Database.insertPlayerCard(playername, mycard);
-            }
-            Database.updateBoosterUsed(boosterid[0]);
-            Database.updatePlayerCoins(playername, 5, false);
-            string mydata = "\nYou acquired a new booster pack \n";
-            string mystatus = "200 Success";
-            string mymime = "text/plain";
-            ServerResponse(mystatus, mymime, mydata);
-            //----------andere Threads wärend ausführung stoppen--------------------------
+            
 
         }
 
@@ -856,6 +888,25 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
                 ServerResponse(status, mime, data);
                 return;
             }
+            //check if tradedeal is already on market
+            int onMarket = Database.selectTradeBelongsToPlayer(username, tradeId);
+            if (onMarket == -1 || onMarket > 1)
+            {
+                string data = "\nDatabase Error while trying to delete trade deal\n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            if (onMarket == 1)
+            {
+                string data = "\nThis trade offer already exists \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
             //put card on the database table trading
             bool done = Database.insertTrading(username, tradeId, cardId, minimumDamage, tradeType);
 
@@ -877,8 +928,222 @@ namespace Monster_Trading_Card_Game.REST_HTTPCode
             }
 
         }
+        //make trade deal---------------------------------------------
+        public void MakeTradeDeal(List<string> login, string tradeId)
+        {
+            bool isOnline = false;
+            for (int i = 0; i < login.Count; i++)
+            {
+                if (login[i] == authorization)
+                {
+                    isOnline = true;
+                }
+            }
+            if (!isOnline)
+            {
+                string data = "\nuser is not logged in \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
+            int lenght = authorization.IndexOf("-mtcgToken");
+            string username = authorization.Substring(0, lenght);
+
+            dynamic jasondata = JProperty.Parse(body);
+            string cardId = jasondata;
+
+            //check if trade deal exists
+            int tradeExists = Database.selectTradeExists(tradeId);
+            if (tradeExists == -1 || tradeExists > 1)
+            {
+                string data = "\nDatabase Error while trying to trade\n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            if (tradeExists == 0)
+            {
+                string data = "\nThis trade offer does not exists \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
+            //check if trade deal belongs to the user
+            int tradeDealbelongsToPlayer = Database.selectTradeBelongsToPlayer(username, tradeId);
+            if (tradeDealbelongsToPlayer == -1 || tradeDealbelongsToPlayer > 1)
+            {
+                string data = "\nDatabase Error while trying to trade\n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            if (tradeDealbelongsToPlayer == 1)
+            {
+                string data = "\n You can not trade with yourselfe \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
+            //check if the trade card belongs to user
+            int cardBelongsToPlayer = Database.selectCardBelongsToPlayer(username, cardId);
+            if (cardBelongsToPlayer ==-1 || cardBelongsToPlayer > 1)
+            {
+                string data = "\nDatabase Error while trying to trade\n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            if(cardBelongsToPlayer == 0)
+            {
+                string data = "\nYou can not trade a card that does not belong to you\n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
+            //check if trade card is in deck
+            int cardInDeck = Database.selectCardInDeck(cardId);
+            
+            if(cardInDeck == -1 || cardInDeck > 1)
+            {
+                string data = "\nDatabase Error while trying to trade\n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            if(cardInDeck == 1)
+            {
+                string data = "\nYou can not trade a card that is in your deck\n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
+            //check if the trade card meets the conditions
+            double carddamage = Database.selectCardDamage(cardId);
+            string cardtype = Database.selectCardType(cardId);
+
+            int meetsCondition = Database.selectMeetsTradeCondition(tradeId, carddamage, cardtype);
+            if (meetsCondition == -1 || meetsCondition > 1)
+            {
+                string data = "\nDatabase Error while trying to trade\n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            if (meetsCondition == 0)
+            {
+                string data = "\nYour offer does not meet the trading conditions\n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
+            //trade
+            string OwnerOfTrade=Database.selectUserInTrade(tradeId);
+            string TradeCard = Database.selectCardInTrade(tradeId);
+
+            bool firstrade = Database.updateCardBelongsToPlayer(OwnerOfTrade,cardId);
+            bool secondtrade = Database.updateCardBelongsToPlayer(username, TradeCard);
+            bool tradeDelete = Database.deleteTrade(tradeId);
+            if (!firstrade || !secondtrade)
+            {
+                string data = "\nDatabase Error while trying to trade\n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            else
+            {
+                string data = "\nTrade went through\n";
+                string status = "200 Success";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
 
 
+
+        }
+        //########################### Type Delete ########################################
+
+
+        //delete trade deal --------------------------------------------
+        public void DeleteTradeDeal(List<string> login, string tradeId) 
+        {
+            bool isOnline = false;
+            for (int i = 0; i < login.Count; i++)
+            {
+                if (login[i] == authorization)
+                {
+                    isOnline = true;
+                }
+            }
+            if (!isOnline)
+            {
+                string data = "\nuser is not logged in \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
+            //check if trading deal belongs to user who wants to delete it and if trade deal even exists
+            int lenght = authorization.IndexOf("-mtcgToken");
+            string username = authorization.Substring(0, lenght);
+
+            int belongsToPlayer = Database.selectTradeBelongsToPlayer(username, tradeId);
+            if (belongsToPlayer == -1 || belongsToPlayer > 1)
+            {
+                string data = "\nDatabase Error while trying to delete trade deal\n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            if (belongsToPlayer == 0)
+            {
+                string data = "\nThis trade offer does not belong to this player or does not exist \n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+
+            //delete Trade deal
+            bool done = Database.deleteTrade(tradeId);
+            if (!done) 
+            {
+                string data = "\nDatabase Error while trying to delete trade deal\n";
+                string status = "404 Not found";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+            else
+            {
+                string data = "\nTrade deal was deleted \n";
+                string status = "200 Success";
+                string mime = "text/plain";
+                ServerResponse(status, mime, data);
+                return;
+            }
+        }
 
 
 

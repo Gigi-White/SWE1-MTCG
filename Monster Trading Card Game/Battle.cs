@@ -14,16 +14,20 @@ namespace Monster_Trading_Card_Game
         private List<Card> DeckTwo;
         private int Rounds = 1;
         private List<string> Log = new List<string>();
-        private Winner betterfighter;
+        public Winner betterfighter;
+        public IDatabasehandler Database;
 
 
-    public Battle(List<Card> playerOne, List<Card> playerTwo, string firstUser, string secondUser)
+    public Battle( string playerOne, string playerTwo)
         {
-            DeckOne = playerOne;
-            DeckTwo = playerTwo;
+            IDatabasehandler Database = new Databasehandler();
+            
 
-            UserOne = firstUser;
-            UserTwo = secondUser;
+            UserOne = playerOne;
+            UserTwo = playerOne;
+
+            DeckOne = CreateDeck(playerOne);
+            DeckTwo = CreateDeck(playerTwo);
 
         }
         
@@ -108,7 +112,7 @@ namespace Monster_Trading_Card_Game
 
 
         //-------------------------------------------Funktion die eine Kampfrunde berechnet---------------------------
-        private void Round()
+        public void Round()
         {
             //wer greift zuerst an
             Random rnd = new Random();
@@ -203,6 +207,38 @@ namespace Monster_Trading_Card_Game
             Log.Add("");
             Rounds++;
 
+        }
+
+        private List<Card>CreateDeck(string user)
+        {
+            List<Card> deck = new List<Card>();
+            List<string> cards = new List<string>();
+
+            cards = Database.selectCardIdInDeck(user);
+            foreach(string card in cards)
+            {
+                deck.Add(CreateCard(card));
+            }
+            return deck;
+        }
+
+        private Card CreateCard(string cardId)
+        {
+            List<string> cardData = Database.selectCardData(cardId);
+            string cardname = cardData[0];
+            double damage = Double.Parse(cardData[1]);
+            string cardtype = cardData[2];
+            string element = cardData[3];
+
+            if(cardtype == "Monster")
+            {
+                switch (cardname)
+                {
+
+                }
+            }
+
+            return 
         }
     }
 }
