@@ -6,10 +6,10 @@ using System.Text;
 
 namespace Monster_Trading_Card_Game
 {
-    public class Goblin : MonsterCard
+    public class WaterGoblin : MonsterCard
     {
 
-        public Goblin(float attackPower) : base(Element.Normal, attackPower,CreatureType.Goblin)
+        public WaterGoblin(float attackPower) : base(Element.Water, attackPower,CreatureType.WaterGoblin)
         {
 
         }

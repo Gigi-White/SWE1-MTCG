@@ -6,13 +6,16 @@ namespace Monster_Trading_Card_Game.Enums
 {
     public enum CreatureType
     {
-        Goblin,
+        WaterGoblin,
         Dragon,
         Wizzard,
         Ork,
         Knight,
         Kraken,
         FireElve,
+        FireSpell,
+        WaterSpell,
+        NormalSpell,
         None,
     }
 }

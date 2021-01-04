@@ -6,7 +6,7 @@ namespace Monster_Trading_Card_Game
 {
     public class WaterSpell : SpellCard
     {
-        public WaterSpell(float attackPower) : base(Element.Water, attackPower)
+        public WaterSpell(float attackPower) : base(Element.Water, attackPower, Enums.CreatureType.WaterSpell)
         {
    
         }

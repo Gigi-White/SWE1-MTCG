@@ -1,4 +1,5 @@
-﻿using Monster_Trading_Card_Game.Enums;
+﻿using Monster_Trading_Card_Game.Cardclasses.MonsterCardFolder;
+using Monster_Trading_Card_Game.Enums;
 using System;
 using System.Collections.Generic;
 using System.Reflection.Metadata;
@@ -13,24 +14,38 @@ namespace Monster_Trading_Card_Game
         private List<Card> DeckOne;
         private List<Card> DeckTwo;
         private int Rounds = 1;
-        private List<string> Log = new List<string>();
+        public List<string> Log = new List<string>();
         public Winner betterfighter;
-        public IDatabasehandler Database;
+        private IDatabasehandler Database;
 
 
     public Battle( string playerOne, string playerTwo)
         {
-            IDatabasehandler Database = new Databasehandler();
+            Database = new Databasehandler();
             
 
             UserOne = playerOne;
-            UserTwo = playerOne;
+            UserTwo = playerTwo;
 
             DeckOne = CreateDeck(playerOne);
             DeckTwo = CreateDeck(playerTwo);
 
         }
-        
+        // for tests
+        public Battle(string playerOne, string playerTwo, List<Card> deckOne, List<Card> deckTwo)
+        {
+            Database = new Databasehandler();
+
+
+            UserOne = playerOne;
+            UserTwo = playerTwo;
+
+            DeckOne = deckOne;
+            DeckTwo = deckTwo;
+
+        }
+
+
         //----------------------Hauptfunktion welche das Spiel berechnet------------------------------
         public Winner BattleHandler() 
         {
@@ -45,27 +60,50 @@ namespace Monster_Trading_Card_Game
 
 
 
-            //Nochmal ein Log Eintrag wer gewonnen hat
-            Log.Add("Spiel ist beendet");
+            //Nochmal ein Log Eintrag wer gewonnen hat und addieren bzw abziehen der Punkte 
+            Log.Add("Game Over");
             if (betterfighter == Winner.FirstPlayer)
             {
-                Log.Add("#####  " + UserOne + " hat gewonnen  #####");
+                Log.Add("\n#####  " + UserOne + " has won the game and receives 3 points #####\n");
+                Database.updatePlayerPoints(UserOne, 3, true);
+
+                if (Database.selectPlayerJustPoints(UserTwo) - 5 > 0)
+                {
+                    Database.updatePlayerPoints(UserTwo, 5, false);
+                    Log.Add("\n#####  " + UserTwo + " has lost the game and loses 5 points #####\n");
+                }
+                else
+                {
+                    Log.Add("\n#####  " + UserTwo + " has lost the game but can not drop deeper than 0 points #####\n");
+                }
+                
             }
             else if(betterfighter == Winner.SekondPlayer)
             {
-                Log.Add("#####  " + UserTwo + " hat gewonnen  #####");
+                Log.Add("\n#####  " + UserTwo + " has won the game and receives 3 points #####\n");
+                Database.updatePlayerPoints(UserTwo, 3, true);
+
+                if (Database.selectPlayerJustPoints(UserOne) - 5 > 0)
+                {
+                    Database.updatePlayerPoints(UserOne, 5, false);
+                    Log.Add("\n#####  " + UserOne + " has lost and loses 5 points #####\n");
+                }
+                else
+                {
+                    Log.Add("\n#####  " + UserOne + " has lost but can not drop deeper than to 0 points #####\n");
+                }
             }
             else
             {
-                Log.Add("#####  unentschiden  #####");
+                Log.Add("#####  draw  #####");
             }
 
 
             //Ausgabe des Logs
-            foreach (var sentence in Log) 
+            /*foreach (var sentence in Log) 
             {
                 Console.WriteLine(sentence);
-            } 
+            }*/ 
 
             return betterfighter; //Sieger rausgeben 
         }
@@ -133,16 +171,16 @@ namespace Monster_Trading_Card_Game
 
             //Log Eintrag wer wie viel Schaden verursacht
 
-            Log.Add("Runde " + Rounds + ": ");
+            Log.Add("Round " + Rounds + ": ");
             if (turn == 1) 
             {
-                Log.Add(DeckOne[cardPlayerOne].Creature + " von " + UserOne + " greift zuerst an und verursacht " + DeckTwo[cardPlayerTwo].Damage + " Schaden");
-                Log.Add(DeckTwo[cardPlayerTwo].Creature + " von " + UserTwo + " greift als Zweites an und verursacht " + DeckOne[cardPlayerOne].Damage + " Schaden");
+                Log.Add("\n" + DeckOne[cardPlayerOne].Creature + " of " + UserOne + " attacks first and deals " + DeckTwo[cardPlayerTwo].Damage + " damage");
+                Log.Add("\n" + DeckTwo[cardPlayerTwo].Creature + " of " + UserTwo + " attacks second and deals " + DeckOne[cardPlayerOne].Damage + " damage");
             }
             else
             {
-                Log.Add(DeckTwo[cardPlayerTwo].Creature + " von " + UserTwo + " greift zuerst an und verursacht " + DeckOne[cardPlayerOne].Damage + " Schaden");
-                Log.Add(DeckOne[cardPlayerOne].Creature + " von " + UserOne + " greift als Zweites an und verursacht " + DeckTwo[cardPlayerTwo].Damage + " Schaden");
+                Log.Add("\n" + DeckTwo[cardPlayerTwo].Creature + " of " + UserTwo + " attacks first and deals " + DeckOne[cardPlayerOne].Damage + " damage");
+                Log.Add("\n" + DeckOne[cardPlayerOne].Creature + " of " + UserOne + " attacks second and deals " + DeckTwo[cardPlayerTwo].Damage + " damage");
                 
             }
             
@@ -154,23 +192,23 @@ namespace Monster_Trading_Card_Game
             {
 
                 
-                Log.Add("Beide Karten haben gleich viel Schaden verursacht"); //Eintrag im Log bei Gleichstand
+                Log.Add("\n" + "Both cards dealt the same amount of damage"); //Eintrag im Log bei Gleichstand
 
                 //Schaden beider Karten wird auf 0 gestellt
                 DeckOne[cardPlayerOne].Damage = 0;
                 DeckTwo[cardPlayerTwo].Damage = 0;
                 
                 
-                if (turn == 1)  //UserOne gewinnt diese Runde 
+                if (turn == 2)  //UserOne gewinnt diese Runde 
                 {
-                    Log.Add(UserOne + " gewinnt diese Runde. " +  DeckTwo[cardPlayerTwo].Creature + " kommt in Deck von " + UserOne);
+                    Log.Add("\n" + UserOne + " winns this round. " +  DeckTwo[cardPlayerTwo].Creature + " gets in Deck of " + UserOne);
                     
                     DeckOne.Add(DeckTwo[cardPlayerTwo]);
                     DeckTwo.RemoveAt(cardPlayerTwo);
                 }
                 else //UserTwo gewinnt diese Runde
                 {
-                    Log.Add(UserTwo + " gewinnt diese Runde. " + DeckOne[cardPlayerOne].Creature + " kommt in Deck von " + UserTwo);
+                    Log.Add("\n" + UserTwo + " winns this round. " + DeckOne[cardPlayerOne].Creature + " gets in Deck of " + UserTwo);
 
                     DeckTwo.Add(DeckOne[cardPlayerOne]);
                     DeckOne.RemoveAt(cardPlayerOne);
@@ -179,8 +217,8 @@ namespace Monster_Trading_Card_Game
             //Wenn der Schaden auf Der Karte von PlayerOne größer ist, gewinnt Player Two
             else if (DeckOne[cardPlayerOne].Damage > DeckTwo[cardPlayerTwo].Damage)
             {
-                Log.Add(DeckTwo[cardPlayerTwo].Creature + " von " + UserTwo + " hat mehr Schaden ausgeteilt. ");
-                Log.Add(UserTwo + " gewinnt diese Runde. " + DeckOne[cardPlayerOne].Creature + " kommt in Deck von " + UserTwo);
+                Log.Add("\n" + DeckTwo[cardPlayerTwo].Creature + " of " + UserTwo + " dealt more damage. ");
+                Log.Add("\n" + UserTwo + " winns this round. " + DeckOne[cardPlayerOne].Creature + " gets in Deck of " + UserTwo);
 
                 DeckOne[cardPlayerOne].Damage = 0;
                 DeckTwo[cardPlayerTwo].Damage = 0;
@@ -192,8 +230,8 @@ namespace Monster_Trading_Card_Game
             //Wenn der Schaden auf Der Karte von PlayerOne kleiner ist, gewinnt Player One
             else if (DeckOne[cardPlayerOne].Damage < DeckTwo[cardPlayerTwo].Damage)
             {
-                Log.Add(DeckOne[cardPlayerOne].Creature + " von " + UserOne + " hat mehr Schaden ausgeteilt. ");
-                Log.Add(UserOne + " gewinnt diese Runde. " + DeckTwo[cardPlayerTwo].Creature + " kommt in Deck von " + UserOne);
+                Log.Add("\n" + DeckOne[cardPlayerOne].Creature + " of " + UserOne + " dealt more damage. ");
+                Log.Add("\n" + UserOne + " winns this round. " + DeckTwo[cardPlayerTwo].Creature + " gets in Deck of " + UserOne);
 
                 DeckOne[cardPlayerOne].Damage = 0;
                 DeckTwo[cardPlayerTwo].Damage = 0;
@@ -201,14 +239,16 @@ namespace Monster_Trading_Card_Game
                 DeckOne.Add(DeckTwo[cardPlayerTwo]);
                 DeckTwo.RemoveAt(cardPlayerTwo);
             }
-            Log.Add(UserOne + " hat noch " + DeckOne.Count + " Karten im Deck");
-            Log.Add(UserTwo + " hat noch " + DeckTwo.Count + " Karten im Deck");
-            Log.Add("##########################################################################################################");
-            Log.Add("");
+            Log.Add("\n" + UserOne + " has " + DeckOne.Count + " cards left in the deck ");
+            Log.Add("\n" + UserTwo + " has " + DeckTwo.Count + " cards left in the deck ");
+            Log.Add("\n" + "##########################################################################################################");
+            Log.Add("\n");
             Rounds++;
 
         }
 
+
+        //------------------------------------create deck for the player form the Database----------------------------------------
         private List<Card>CreateDeck(string user)
         {
             List<Card> deck = new List<Card>();
@@ -222,23 +262,57 @@ namespace Monster_Trading_Card_Game
             return deck;
         }
 
+        //----------------------------------------------------create the card-----------------------------------------------------------------
         private Card CreateCard(string cardId)
         {
             List<string> cardData = Database.selectCardData(cardId);
             string cardname = cardData[0];
-            double damage = Double.Parse(cardData[1]);
+            float damage = float.Parse(cardData[1]);
             string cardtype = cardData[2];
             string element = cardData[3];
-
+            
             if(cardtype == "Monster")
             {
                 switch (cardname)
                 {
-
+                    case "Dragon":
+                        Card dragonCard = new Dragon(damage);
+                        return dragonCard;
+                    case "FireElfe":
+                        Card elfCard = new FireElfe(damage);
+                        return elfCard;
+                    case "Knight":
+                        Card knightCard = new Knight(damage);
+                        return knightCard;
+                    case "Ork":
+                        Card orkCard = new Ork(damage);
+                        return orkCard;
+                    case "WaterGoblin":
+                        Card goblinCard = new WaterGoblin(damage);
+                        return goblinCard;
+                    case "Wizzard":
+                        Card wizzardCard = new Wizzard(damage);
+                        return wizzardCard;
+                }
+            }
+            else if (cardtype == "Spell")
+            {
+                switch (cardname)
+                {
+                    case "RegularSpell":
+                        Card normalCard = new NormalSpell(damage);
+                        return normalCard;
+                    case "FireSpell":
+                        Card fireCard = new FireSpell(damage);
+                        return fireCard;
+                    case "WaterSpell":
+                        Card waterCard = new WaterSpell(damage);
+                        return waterCard;
                 }
             }
 
-            return 
+
+            return null;
         }
     }
 }

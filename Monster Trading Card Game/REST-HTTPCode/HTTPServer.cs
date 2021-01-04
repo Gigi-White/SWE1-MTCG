@@ -40,7 +40,7 @@ namespace REST_HTTP_Server
 
         //Prgramstart
 
-        //run the connection-----------------------------------------------------
+        //-------------------------------run the connection-----------------------------------------------------
         public void Run()
         {
             
@@ -62,7 +62,7 @@ namespace REST_HTTP_Server
                       
         }
 
-        //handle the client----------------------------------------------
+        //------------------------------------------handle the client----------------------------------------------
         private void HandleClient(Object myclient) 
         {
             Console.WriteLine("Client connected");
@@ -112,7 +112,28 @@ namespace REST_HTTP_Server
 
                 else
                 {
-                    DoBattle(req.authorization);
+                    bool done = DoBattle(req.authorization);
+                    if (!done)
+                    {
+                        string data = "\nNo Battle was found \n";
+                        string status = "404 Not found";
+                        string mime = "text/plain";
+                        handler.ServerResponse(status, mime, data);
+                        gamelockcheck = 0;
+
+                    }
+                    else
+                    {
+                        string status = "200 Success";
+                        string mime = "text/plain";
+                        handler.ServerResponse(status, mime, gamelog);
+                        if (gamelockcheck == 2)
+                        {
+                            gamelockcheck = 0;
+                            gamelog = "";
+                        }
+                    }
+
                 }
 
             }
@@ -149,6 +170,8 @@ namespace REST_HTTP_Server
             return msg;    
         }
 
+
+        //--------------------------------------do the Battle with two Threads------------------------------
         private bool DoBattle(string authorization) 
         {
 
@@ -165,11 +188,36 @@ namespace REST_HTTP_Server
                     string secondPlayer = wantToBattle[players - 1];
                     Battle myBattle = new Battle(firstPlayer, secondPlayer);
                     myBattle.BattleHandler();
+                    string message = "";
+                    //this is second player 
+                    foreach (string line in myBattle.Log)
+                    {
+                        message += line;
+                    }
+                    gamelog = message;
+                    gamelockcheck++;
+                    return true;
                 }
             }
+            bool gamePlayed = false;
+            for (int i=0; i<10; i++ ) 
+            {
+                Thread.Sleep(2000);
+                if (gamelockcheck > 0)
+                {
+                    gamePlayed = true;
+                    i = 30;
+                }
+            } 
 
-
+            if(!gamePlayed)
+            {
+                return false;
+            }
+            gamelockcheck++;
             return true;
+
+
         }
 
     }

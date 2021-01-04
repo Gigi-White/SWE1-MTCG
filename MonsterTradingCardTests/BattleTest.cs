@@ -23,12 +23,12 @@ namespace MonsterTradingCardTests
             DeckEins.Add(new Dragon(50));
             DeckEins.Add(new Dragon(48));
 
-            DeckZwei.Add(new Goblin(20));
-            DeckZwei.Add(new Goblin(35));
-            DeckZwei.Add(new Goblin(30));
+            DeckZwei.Add(new WaterGoblin(20));
+            DeckZwei.Add(new WaterGoblin(35));
+            DeckZwei.Add(new WaterGoblin(30));
 
 
-            Battle Fight = new Battle(DeckEins, DeckZwei, "Yugi", "Kaiba");
+            Battle Fight = new Battle("Yugi", "Kaiba", DeckEins, DeckZwei);
             var actualwinner = Fight.BattleHandler();
 
             Assert.AreEqual(Winner.FirstPlayer, actualwinner);
@@ -40,12 +40,12 @@ namespace MonsterTradingCardTests
             List<Card> DeckEins = new List<Card>();
             List<Card> DeckZwei = new List<Card>();
 
-            DeckZwei.Add(new Goblin(32));
-            DeckZwei.Add(new Goblin(30));
-            DeckZwei.Add(new Goblin(35));
+            DeckZwei.Add(new WaterGoblin(32));
+            DeckZwei.Add(new WaterGoblin(30));
+            DeckZwei.Add(new WaterGoblin(35));
 
 
-            Battle Fight = new Battle(DeckEins, DeckZwei, "Geralt", "Triss");
+            Battle Fight = new Battle("Geralt", "Triss", DeckEins, DeckZwei);
             var actualwinner = Fight.BattleHandler();
 
             Assert.AreEqual(Winner.SekondPlayer, actualwinner);

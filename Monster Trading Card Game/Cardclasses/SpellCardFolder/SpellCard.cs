@@ -15,11 +15,11 @@ namespace Monster_Trading_Card_Game
         override public float AttackPower { get; }
         override public float Damage { get; set; }
 
-        public SpellCard(Element element, float attackPower)
+        public SpellCard(Element element, float attackPower, CreatureType creatureType)
         {
             Element = element;
             Type = CardType.Spell;
-            Creature = CreatureType.None;
+            Creature = creatureType;
             AttackPower = attackPower;
             Damage = 0;
 

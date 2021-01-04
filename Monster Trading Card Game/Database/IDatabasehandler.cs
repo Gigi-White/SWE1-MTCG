@@ -60,7 +60,11 @@ namespace Monster_Trading_Card_Game
         public List<string> selectPlayerDeck(string playername, int show);
         public int selectPlayerDeckNumber(string playername);
 
+        //gives back a string with playername and his points
         public string selectPlayerPoints(string playername);
+
+        //gives back a int of points
+        public int selectPlayerJustPoints(string username);
 
         public int selectPlayerCoins(string playername);
 

@@ -1091,7 +1091,7 @@ namespace Monster_Trading_Card_Game
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
 
-                var sql = "SELECT damage FROM card WHERE cardid = @cardId";
+                var sql = "SELECT cardtype FROM card WHERE cardid = @cardId";
 
                 using var cmd = new NpgsqlCommand(sql, con);
                 cmd.Parameters.AddWithValue("cardId", cardId);
@@ -1121,12 +1121,12 @@ namespace Monster_Trading_Card_Game
                 using var con = new NpgsqlConnection(cs);
                 con.Open();
 
-                var sql = "SELECT COUNT(*) FROM trading WHERE tradeid = @tradeId AND cardtype = @type AND damage <= @damage";
+                var sql = "SELECT COUNT(*) FROM trading WHERE tradeid = @tradeId AND type = @type AND damage <= @damage";
 
                 using var cmd = new NpgsqlCommand(sql, con);
                 cmd.Parameters.AddWithValue("tradeId", tradeId);
                 cmd.Parameters.AddWithValue("type", type);
-                cmd.Parameters.AddWithValue("tradeId", damage);
+                cmd.Parameters.AddWithValue("damage", damage);
                 cmd.Prepare();
                 using NpgsqlDataReader rdr = cmd.ExecuteReader();
 
@@ -1261,9 +1261,9 @@ namespace Monster_Trading_Card_Game
                 while (rdr.Read())
                 {
                     cardData.Add(rdr.GetString(0));
-                    cardData.Add(rdr.GetDouble(0).ToString());
-                    cardData.Add(rdr.GetString(0));
-                    cardData.Add(rdr.GetString(0));
+                    cardData.Add(rdr.GetDouble(1).ToString());
+                    cardData.Add(rdr.GetString(2));
+                    cardData.Add(rdr.GetString(3));
                 }
 
                 return cardData;
@@ -1275,7 +1275,35 @@ namespace Monster_Trading_Card_Game
                 return cardData;
             }
         }
+        public int selectPlayerJustPoints(string username)
+        {
+            try
+            {
+                var cs = "Host=localhost;Username=postgres;Password=Rainbowdash1!;Database=MTCG";
 
+                using var con = new NpgsqlConnection(cs);
+                con.Open();
+
+                var sql = "SELECT points FROM player WHERE username = @username";
+
+                using var cmd = new NpgsqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("username", username);
+                cmd.Prepare();
+                using NpgsqlDataReader rdr = cmd.ExecuteReader();
+
+                int points =0;
+                while (rdr.Read())
+                {
+                    points = (rdr.GetInt32(0));
+                }
+
+                return points;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
 
     }
 

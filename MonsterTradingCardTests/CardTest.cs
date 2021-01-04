@@ -28,7 +28,7 @@ namespace Monster_Trading_Card_Game
         [Test]//Goblins können Drachen keinen Schaden zufügen
         public void GoblinFightAgainstDragon()
         {
-            Card Smorph = new Goblin(10);
+            Card Smorph = new WaterGoblin(10);
             Card Smaug = new Dragon(35);
 
             var actualAttack = Smorph.Attack(Smaug);
